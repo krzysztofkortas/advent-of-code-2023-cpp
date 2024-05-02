@@ -11,7 +11,7 @@ add_compile_options(
   -Wall
   -Wextra
   -stdlib=libstdc++
-  -fconstexpr-steps=99999999)
+  -fconstexpr-steps=999999999)
 
 # Use GCC standard library from GCC 14.0.0
 include_directories(BEFORE SYSTEM "/usr/local/include/c++/14.0.0")
