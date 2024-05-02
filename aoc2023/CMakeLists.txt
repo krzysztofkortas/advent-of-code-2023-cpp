@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_GENERATOR "Ninja")
-add_compile_options(-pedantic -Wall -Wextra -stdlib=libstdc++)
+add_compile_options(
+  -pedantic
+  -Wall
+  -Wextra
+  -stdlib=libstdc++
+  -fconstexpr-steps=99999999)
 
 # Use GCC standard library from GCC 14.0.0
 include_directories(BEFORE SYSTEM "/usr/local/include/c++/14.0.0")
@@ -18,4 +23,7 @@ else()
       "/usr/local/include/c++/14.0.0/aarch64-linux-gnu/")
 endif()
 
-add_subdirectory(demo)
+add_library(aoc2023)
+target_sources(aoc2023 PUBLIC
+  day01.cpp
+)
