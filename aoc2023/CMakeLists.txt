@@ -14,13 +14,13 @@ add_compile_options(
   -fconstexpr-steps=999999999)
 
 # Use GCC standard library from GCC 14.0.0
-include_directories(BEFORE SYSTEM "/usr/local/include/c++/14.0.0")
+include_directories(BEFORE SYSTEM "/usr/local/include/c++/14.0.1")
 if(${TARGET_ARCH} STREQUAL "x64")
     include_directories(BEFORE SYSTEM
-      "/usr/local/include/c++/14.0.0/x86_64-linux-gnu/")
+      "/usr/local/include/c++/14.0.1/x86_64-linux-gnu/")
 else()
     include_directories(BEFORE SYSTEM
-      "/usr/local/include/c++/14.0.0/aarch64-linux-gnu/")
+      "/usr/local/include/c++/14.0.1/aarch64-linux-gnu/")
 endif()
 
 add_library(aoc2023)
