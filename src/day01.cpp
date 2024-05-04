@@ -4,6 +4,8 @@
 #include <ranges>
 #include <string_view>
 
+#include <gtest/gtest.h>
+
 #include "inputs/day01.h"
 
 namespace {
@@ -45,7 +47,7 @@ constexpr std::string getModifiedLine(std::string str) {
   return str;
 }
 
-constexpr int calculatePart2(std::string_view input) {
+int calculatePart2(std::string_view input) {
   return std::ranges::fold_left(
       input | vw::split('\n') | vw::transform([&](auto &&line) {
         auto digits = getModifiedLine(line | std::ranges::to<std::string>()) |
@@ -56,10 +58,12 @@ constexpr int calculatePart2(std::string_view input) {
       0, std::plus<>{});
 }
 
-static_assert(calculatePart1(day01::sample_part1) == 142);
-static_assert(calculatePart2(day01::sample_part2) == 281);
+TEST(day01, test) {
+  EXPECT_EQ(calculatePart1(day01::sample_part1), 142);
+  EXPECT_EQ(calculatePart2(day01::sample_part2), 281);
 
-static_assert(calculatePart1(day01::input) == 54601);
-static_assert(calculatePart2(day01::input) == 54078);
+  EXPECT_EQ(calculatePart1(day01::input), 54601);
+  EXPECT_EQ(calculatePart2(day01::input), 54078);
+}
 
 } // anonymous namespace
