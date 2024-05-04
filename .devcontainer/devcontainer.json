@@ -1,5 +1,7 @@
 {
-	"image": "happycerberus/devenv-trunk:20240118",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
