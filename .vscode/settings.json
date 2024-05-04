@@ -6,7 +6,6 @@
         "--background-index",
         "--compile-commands-dir=${workspaceFolder}/build/"
     ],
-    "cmake.sourceDirectory": "${workspaceFolder}/aoc2023",
     "cmake.configureOnOpen": true,
     "cmake.options.statusBarVisibility": "visible",
     "cmake.configureSettings": {
