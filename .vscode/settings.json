@@ -16,6 +16,13 @@
         "miDebuggerPath": "/usr/local/bin/gdb"
     },
     "editor.formatOnSave": true,
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/usr/bin/bash",
+            "icon": "terminal-bash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
     "[cpp]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
     },
