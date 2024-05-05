@@ -15,5 +15,6 @@ add_compile_options(
 include(CTest)
 
 find_package(GTest CONFIG REQUIRED)
+find_package(pegtl CONFIG REQUIRED)
 
 add_subdirectory(src)

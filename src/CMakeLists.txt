@@ -6,6 +6,7 @@ target_sources(aoc2023 PUBLIC
 
 target_link_libraries(aoc2023 PRIVATE
   GTest::gtest_main
+  taocpp::pegtl
 )
 
 include(GoogleTest)
