@@ -1,0 +1,111 @@
+{
+    "version": 8,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 28,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "conf-common",
+            "hidden": true,
+            "description": "General settings that apply to all configurations",
+            "generator": "Ninja",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "binaryDir": "${sourceDir}/build/out/${presetName}"
+        },
+        {
+            "name": "gcc-common",
+            "hidden": true,
+            "inherits": "conf-common",
+            "description": "General settings that apply to gcc",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "clang-common",
+            "hidden": true,
+            "inherits": "conf-common",
+            "description": "General settings that apply to clang",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang-18",
+                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/14.0.1;/usr/local/include/c++/14.0.1/x86_64-linux-gnu"
+            }
+        },
+        {
+            "name": "gcc-debug",
+            "inherits": "gcc-common",
+            "displayName": "gcc Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "gcc-release",
+            "inherits": "gcc-common",
+            "displayName": "gcc Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "clang-debug",
+            "inherits": "clang-common",
+            "displayName": "clang Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "clang-release",
+            "inherits": "clang-common",
+            "displayName": "clang Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-common",
+            "hidden": true,
+            "description": "Test CMake settings that apply to all configurations",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true
+            }
+        },
+        {
+            "name": "test-gcc-debug",
+            "inherits": "test-common",
+            "displayName": "Strict",
+            "description": "Enable output and stop on failure",
+            "configurePreset": "gcc-debug"
+        },
+        {
+            "name": "test-gcc-release",
+            "inherits": "test-common",
+            "displayName": "Strict",
+            "description": "Enable output and stop on failure",
+            "configurePreset": "gcc-release"
+        },
+        {
+            "name": "test-clang-debug",
+            "inherits": "test-common",
+            "displayName": "Strict",
+            "description": "Enable output and stop on failure",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "test-clang-release",
+            "inherits": "test-common",
+            "displayName": "Strict",
+            "description": "Enable output and stop on failure",
+            "configurePreset": "clang-release"
+        }
+    ]
+}

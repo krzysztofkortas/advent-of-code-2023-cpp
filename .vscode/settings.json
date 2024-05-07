@@ -8,8 +8,8 @@
     ],
     "cmake.configureOnOpen": true,
     "cmake.options.statusBarVisibility": "visible",
+    "cmake.useCMakePresets": true,
     "cmake.configureSettings": {
-        "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "TARGET_ARCH": "${buildKitTargetArch}",
     },
     "cmake.debugConfig": {
