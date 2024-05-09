@@ -29,8 +29,8 @@
             "inherits": "conf-common",
             "description": "General settings that apply to clang",
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang-18",
-                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/14.0.1;/usr/local/include/c++/14.0.1/x86_64-linux-gnu"
+                "CMAKE_CXX_COMPILER": "clang-19",
+                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/15.0.0;/usr/local/include/c++/15.0.0/x86_64-linux-gnu"
             }
         },
         {

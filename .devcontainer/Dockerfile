@@ -1,4 +1,4 @@
-FROM happycerberus/devenv-trunk:20240118
+FROM krzysztofkortas/devenv-trunk:latest
 
 ARG USERNAME=vscode
 ARG USER_UID=1000
