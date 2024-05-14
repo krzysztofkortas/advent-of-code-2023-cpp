@@ -12,7 +12,11 @@
             "description": "General settings that apply to all configurations",
             "generator": "Ninja",
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-            "binaryDir": "${sourceDir}/build/out/${presetName}"
+            "binaryDir": "${sourceDir}/build/out/${presetName}",
+            "cacheVariables": {
+                "VCPKG_MANIFEST_DIR": "${sourceDir}/vcpkg",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets"
+            }
         },
         {
             "name": "gcc-common",
@@ -20,6 +24,7 @@
             "inherits": "conf-common",
             "description": "General settings that apply to gcc",
             "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
                 "CMAKE_CXX_COMPILER": "g++"
             }
         },
@@ -29,8 +34,12 @@
             "inherits": "conf-common",
             "description": "General settings that apply to clang",
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang-19",
-                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/15.0.0;/usr/local/include/c++/15.0.0/x86_64-linux-gnu"
+                "CMAKE_C_COMPILER": "/usr/bin/clang-19",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-19",
+                "CMAKE_CXX_STANDARD_LIBRARIES": "/usr/local/lib64/libstdc++.so",
+                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/15.0.0;/usr/local/include/c++/15.0.0/x86_64-linux-gnu",
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-19",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-19-toolchain.cmake"
             }
         },
         {
