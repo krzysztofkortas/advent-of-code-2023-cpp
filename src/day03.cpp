@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <print>
 #include <ranges>
 #include <regex>
@@ -78,12 +79,51 @@ int solvePart1(std::string_view input) {
       0, std::plus<>{});
 }
 
+std::vector<Pos> getAsterisksPositions(std::string_view input) {
+  std::vector<Pos> positions;
+  for (auto &&[row, line] : input | vw::split('\n') | vw::enumerate) {
+    for (auto &&[col, c] : line | vw::enumerate) {
+      if (c == '*')
+        positions.push_back({.row = row, .col = col});
+    }
+  }
+
+  return positions;
+}
+
+int solvePart2(std::string_view input) {
+  auto numbers = getNumbers(input);
+  auto asterisks = getAsterisksPositions(input);
+
+  return std::ranges::fold_left(
+      asterisks | vw::transform([&numbers](const Pos &asteriskPos) {
+        std::vector<Number> adjacentNumbers;
+        for (auto number : numbers) {
+          auto numberPos = number.pos;
+          if (std::llabs(asteriskPos.row - numberPos.row) <= 1 &&
+              asteriskPos.col + 1 >= numberPos.col &&
+              asteriskPos.col <= numberPos.col + number.value.length()) {
+            adjacentNumbers.push_back(number);
+          }
+        }
+        return std::make_tuple(asteriskPos, adjacentNumbers);
+      }) | vw::filter([](const auto &t) {
+        auto &&[asterisk, adjacentNumbers] = t;
+        return adjacentNumbers.size() == 2;
+      }) | vw::transform([](const auto &t) {
+        auto &&[asterisk, adjacentNumbers] = t;
+        return std::stoi(adjacentNumbers[0].value) *
+               std::stoi(adjacentNumbers[1].value);
+      }),
+      0, std::plus<>{});
+}
+
 TEST(day03, test) {
   EXPECT_EQ(solvePart1(day03::sample), 4361);
   EXPECT_EQ(solvePart1(day03::input), 530849);
 
-  //   EXPECT_EQ(solvePart2(day03::sample), 467835);
-  //   EXPECT_EQ(solvePart2(day03::input), 84900879);
+  EXPECT_EQ(solvePart2(day03::sample), 467835);
+  EXPECT_EQ(solvePart2(day03::input), 84900879);
 }
 
 } // anonymous namespace
