@@ -4,7 +4,7 @@
     "clangd.path": "/usr/bin/clangd-19",
     "clangd.arguments": [
         "--background-index",
-        "--compile-commands-dir=${workspaceFolder}/build/"
+        "--compile-commands-dir=${workspaceFolder}/build/clang-debug"
     ],
     "cmake.configureOnOpen": true,
     "cmake.options.statusBarVisibility": "visible",

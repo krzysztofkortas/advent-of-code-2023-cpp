@@ -12,7 +12,7 @@
             "description": "General settings that apply to all configurations",
             "generator": "Ninja",
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-            "binaryDir": "${sourceDir}/build/out/${presetName}",
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
                 "VCPKG_MANIFEST_DIR": "${sourceDir}/vcpkg",
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets"
