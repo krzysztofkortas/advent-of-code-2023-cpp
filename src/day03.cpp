@@ -1,7 +1,8 @@
 #include <algorithm>
 #include <cctype>
+#include <concepts>
+#include <cstddef>
 #include <functional>
-#include <print>
 #include <ranges>
 #include <regex>
 #include <string_view>
@@ -10,8 +11,6 @@
 #include <gtest/gtest.h>
 
 #include "inputs/day03.h"
-
-#include <iostream>
 
 namespace {
 
@@ -22,6 +21,8 @@ struct Pos {
   std::int64_t col{};
 };
 
+using Positions = std::vector<Pos>;
+
 struct Number {
   Pos pos;
   std::string value;
@@ -31,27 +32,25 @@ using Numbers = std::vector<Number>;
 
 Numbers getNumbers(std::string_view input) {
   Numbers numbers;
-  std::regex regex(R"(\d+)");
+  const std::regex regex(R"(\d+)");
   for (auto &&[row, line] : input | vw::split('\n') | vw::enumerate) {
-    std::string s = line | std::ranges::to<std::string>();
-    std::smatch match;
-    std::int64_t col = 0;
-    while (std::regex_search(s, match, regex)) {
-      col += match.position();
+    using Iter = std::regex_iterator<decltype(std::cbegin(line))>;
+    for (auto it = Iter{line.cbegin(), line.cend(), regex}; it != Iter{};
+         ++it) {
       numbers.push_back(
-          {.pos = {.row = row, .col = col}, .value = match.str()});
-      col += match.length();
-      s = match.suffix();
+          {.pos = {.row = row, .col = it->position()}, .value = it->str()});
     }
   }
+
   return numbers;
 }
 
-std::vector<Pos> getSymbolPositions(std::string_view input) {
-  std::vector<Pos> positions;
+Positions getSymbolPositions(std::string_view input,
+                             std::predicate<char> auto isSymbol) {
+  Positions positions;
   for (auto &&[row, line] : input | vw::split('\n') | vw::enumerate) {
     for (auto &&[col, c] : line | vw::enumerate) {
-      if (!std::isdigit(c) && c != '.')
+      if (isSymbol(c))
         positions.push_back({.row = row, .col = col});
     }
   }
@@ -59,59 +58,45 @@ std::vector<Pos> getSymbolPositions(std::string_view input) {
   return positions;
 }
 
+bool isAdjacent(const Number &number, const Pos &symbolPos) {
+  const Pos &numberPos = number.pos;
+  return std::llabs(symbolPos.row - numberPos.row) <= 1 &&
+         symbolPos.col + 1 >= numberPos.col &&
+         symbolPos.col <= numberPos.col + ssize(number.value);
+}
+
 int solvePart1(std::string_view input) {
-  auto numbers = getNumbers(input);
-  auto symbolPositions = getSymbolPositions(input);
+  const Numbers numbers = getNumbers(input);
+  constexpr auto isSymbol = [](unsigned char c) {
+    return !std::isdigit(c) && c != '.';
+  };
+  const Positions symbolPositions = getSymbolPositions(input, isSymbol);
   return std::ranges::fold_left(
       numbers | vw::filter([&symbolPositions](const Number &number) {
-        auto numberPos = number.pos;
-        for (auto symbolPos : symbolPositions) {
-          if (std::llabs(symbolPos.row - numberPos.row) <= 1 &&
-              symbolPos.col + 1 >= numberPos.col &&
-              symbolPos.col <= numberPos.col + number.value.length()) {
-            return true;
-          }
-        }
-        return false;
+        return std::ranges::any_of(symbolPositions,
+                                   [&number](const Pos &symbolPos) {
+                                     return isAdjacent(number, symbolPos);
+                                   });
       }) | vw::transform([](const Number &number) {
         return std::stoi(number.value);
       }),
       0, std::plus<>{});
 }
 
-std::vector<Pos> getAsterisksPositions(std::string_view input) {
-  std::vector<Pos> positions;
-  for (auto &&[row, line] : input | vw::split('\n') | vw::enumerate) {
-    for (auto &&[col, c] : line | vw::enumerate) {
-      if (c == '*')
-        positions.push_back({.row = row, .col = col});
-    }
-  }
-
-  return positions;
-}
-
 int solvePart2(std::string_view input) {
-  auto numbers = getNumbers(input);
-  auto asterisks = getAsterisksPositions(input);
+  const Numbers numbers = getNumbers(input);
+  const Positions asterisks =
+      getSymbolPositions(input, [](char c) { return c == '*'; });
 
   return std::ranges::fold_left(
       asterisks | vw::transform([&numbers](const Pos &asteriskPos) {
-        std::vector<Number> adjacentNumbers;
-        for (auto number : numbers) {
-          auto numberPos = number.pos;
-          if (std::llabs(asteriskPos.row - numberPos.row) <= 1 &&
-              asteriskPos.col + 1 >= numberPos.col &&
-              asteriskPos.col <= numberPos.col + number.value.length()) {
-            adjacentNumbers.push_back(number);
-          }
-        }
-        return std::make_tuple(asteriskPos, adjacentNumbers);
-      }) | vw::filter([](const auto &t) {
-        auto &&[asterisk, adjacentNumbers] = t;
+        return numbers | vw::filter([&asteriskPos](const Number &number) {
+                 return isAdjacent(number, asteriskPos);
+               }) |
+               std::ranges::to<Numbers>();
+      }) | vw::filter([](const Numbers &adjacentNumbers) {
         return adjacentNumbers.size() == 2;
-      }) | vw::transform([](const auto &t) {
-        auto &&[asterisk, adjacentNumbers] = t;
+      }) | vw::transform([](const Numbers &adjacentNumbers) {
         return std::stoi(adjacentNumbers[0].value) *
                std::stoi(adjacentNumbers[1].value);
       }),
