@@ -5,6 +5,7 @@ target_sources(aoc2023 PUBLIC
   day02.cpp
   day03.cpp
   day04.cpp
+  day05.cpp
 )
 
 target_link_libraries(aoc2023 PRIVATE
