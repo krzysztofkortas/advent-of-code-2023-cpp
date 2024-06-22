@@ -131,7 +131,8 @@ int64_t solvePart1(std::string_view input) {
   return (getMaxCycle(input).first.size() + 1) / 2;
 }
 
-bool isInsideCycle(const Position &pos, const Grid &grid, const Path &cycle) {
+bool isInsideCycle(const Position &pos, const Grid &grid,
+                   const std::set<Connection> &cycle) {
   if (pos.row == 0 || pos.row + 1 == std::ssize(grid))
     return false;
 
@@ -141,8 +142,7 @@ bool isInsideCycle(const Position &pos, const Grid &grid, const Path &cycle) {
     const Connection con = {{pos.row, y}, {pos.row - 1, y}};
     const Connection conRev = {con.end, con.begin};
 
-    if (std::ranges::contains(cycle, con) ||
-        std::ranges::contains(cycle, conRev))
+    if (cycle.contains(con) || cycle.contains(conRev))
       ++intersections;
   }
 
@@ -157,12 +157,13 @@ bool isOnCycle(const Position &pos, const Path &cycle) {
 
 int64_t solvePart2(std::string_view input) {
   const auto [maxCycle, grid] = getMaxCycle(input);
+  const std::set<Connection> maxCycleSet(maxCycle.cbegin(), maxCycle.cend());
   int64_t enclosedTiles = 0;
 
   for (const auto &[rowIndex, row] : grid | vw::enumerate) {
     for (const auto &[colIndex, _] : row | vw::enumerate) {
       const Position pos{rowIndex, colIndex};
-      if (!isOnCycle(pos, maxCycle) && isInsideCycle(pos, grid, maxCycle))
+      if (!isOnCycle(pos, maxCycle) && isInsideCycle(pos, grid, maxCycleSet))
         ++enclosedTiles;
     }
   }
