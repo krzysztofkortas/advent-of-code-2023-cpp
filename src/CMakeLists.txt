@@ -17,6 +17,7 @@ target_sources(aoc2023 PUBLIC
   day16.cpp
   day17.cpp
   day18.cpp
+  day19.cpp
   day21.cpp
   day23.cpp
 )
