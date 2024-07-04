@@ -1,15 +1,18 @@
 #include <string_view>
 
-namespace day01 {
+namespace day01
+{
 
 using namespace std::literals;
 
-inline constexpr auto sample_part1 = R"(1abc2
+inline constexpr auto sample_part1 =
+	R"(1abc2
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet)"sv;
 
-inline constexpr auto sample_part2 = R"(two1nine
+inline constexpr auto sample_part2 =
+	R"(two1nine
 eightwothree
 abcone2threexyz
 xtwone3four
@@ -17,7 +20,8 @@ xtwone3four
 zoneight234
 7pqrstsixteen)"sv;
 
-inline constexpr auto input = R"(nine92jnhgqzctpgbcbpz
+inline constexpr auto input =
+	R"(nine92jnhgqzctpgbcbpz
 sevensddvc73three
 9986fmfqhdmq8
 7onexmxbzllfqb

@@ -1,11 +1,12 @@
 #include <string_view>
 
-namespace day14 {
+namespace day14
+{
 
 using namespace std::literals;
 
 inline constexpr auto sample =
-    R"(O....#....
+	R"(O....#....
 O.OO#....#
 .....##...
 OO.#O....O
@@ -17,7 +18,7 @@ O.#..O.#.#
 #OO..#....)"sv;
 
 inline constexpr auto input =
-    R"(..#OO..OO...#..O.OO....OO##O#...O..##.......O.OO..#.O.O#O....#.#O#O####...#.#..#.......O.O..O....#..
+	R"(..#OO..OO...#..O.OO....OO##O#...O..##.......O.OO..#.O.O#O....#.#O#O####...#.#..#.......O.O..O....#..
 .O....#.........OO........O...........#O##O.OOO..O..O.#.#O#O......O..O.O......#O.....###...O..#O....
 ......O.....OO.O...O.O.O.#...#O...O.O#...O#.O.O.O##.O.....##...OO..#O.O....#.#....O.#O.....##....O..
 .##O##...#..###.....O..O#O...........O.##O#OO.O#..OO..OO.#.....OO.O..#.....O..........O..O..O#.O.O..

@@ -1,18 +1,19 @@
 #include <string_view>
 
-namespace day07 {
+namespace day07
+{
 
 using namespace std::literals;
 
 inline constexpr auto sample =
-    R"(32T3K 765
+	R"(32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483)"sv;
 
 inline constexpr auto input =
-    R"(4KTJ4 575
+	R"(4KTJ4 575
 38T4K 449
 4T437 860
 55954 240

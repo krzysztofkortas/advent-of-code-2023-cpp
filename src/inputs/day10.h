@@ -1,39 +1,40 @@
 #include <string_view>
 
-namespace day10 {
+namespace day10
+{
 
 using namespace std::literals;
 
 inline constexpr auto sample1 =
-    R"(.....
+	R"(.....
 .S-7.
 .|.|.
 .L-J.
 .....)"sv;
 
 inline constexpr auto sample2 =
-    R"(-L|F7
+	R"(-L|F7
 7S-7|
 L|7||
 -L-J|
 L|-JF)"sv;
 
 inline constexpr auto sample3 =
-    R"(..F7.
+	R"(..F7.
 .FJ|.
 SJ.L7
 |F--J
 LJ...)"sv;
 
 inline constexpr auto sample4 =
-    R"(7-F7-
+	R"(7-F7-
 .FJ|7
 SJLL7
 |F--J
 LJ.LJ)"sv;
 
 inline constexpr auto sample1Part2 =
-    R"(...........
+	R"(...........
 .S-------7.
 .|F-----7|.
 .||.....||.
@@ -44,7 +45,7 @@ inline constexpr auto sample1Part2 =
 ...........)"sv;
 
 inline constexpr auto sample2Part2 =
-    R"(..........
+	R"(..........
 .S------7.
 .|F----7|.
 .||....||.
@@ -55,7 +56,7 @@ inline constexpr auto sample2Part2 =
 ..........)"sv;
 
 inline constexpr auto sample3Part2 =
-    R"(.F----7F7F7F7F-7....
+	R"(.F----7F7F7F7F-7....
 .|F--7||||||||FJ....
 .||.FJ||||||||L7....
 FJL7L7LJLJ||LJ.L-7..
@@ -67,7 +68,7 @@ L--J.L7...LJS7F-7L7.
 ....L---J.LJ.LJLJ...)"sv;
 
 inline constexpr auto sample4Part2 =
-    R"(FF7FSF7F7F7F7F7F---7
+	R"(FF7FSF7F7F7F7F7F---7
 L|LJ||||||||||||F--J
 FL-7LJLJ||||||LJL-77
 F--JF--7||LJLJ7F7FJ-
@@ -79,7 +80,7 @@ L.L7LFJ|||||FJL7||LJ
 L7JLJL-JLJLJL--JLJ.L)"sv;
 
 inline constexpr auto input =
-    R"(77.FFFF|-77FFL-F-7--F7.|-7.F|7FFF|-FL7-777F.L-FL7.L7--7.|.7-.J-7-J.F-L77F-7-L7F-F.F7-FL-|--7--JF|7.-7FFL7F-F7-F.FF|-F7LF-FLJFLF-J.F7F--F77..
+	R"(77.FFFF|-77FFL-F-7--F7.|-7.F|7FFF|-FL7-777F.L-FL7.L7--7.|.7-.J-7-J.F-L77F-7-L7F-F.F7-FL-|--7--JF|7.-7FFL7F-F7-F.FF|-F7LF-FLJFLF-J.F7F--F77..
 |-L7--|.FLJJL|FF7L|FF|-F.LJFLFLJ|L.LL-7L7J|L7.FJL||L7J|-|-777|.LF77|J|.F|L|..J|FL7L--7J.JL|7-|7F||F-FLJ|-F7|J||FF-7LLJ7J-JJ|-LJF.7-F|LF7|L7F
 L7L|J-|F-77|F|J||.L|7JL|-7F-.|J.|-J77-7||J7LJ7|..L-L-7L7--|-F-J-L7J||F-|J.7-F.|77LF-JJ|FF|FLJLJLFJ7-|7FL---|LL|FJ-J7.|FF-7F|FJ-J-J.L|-|L7F7J
 |7.J7FL-.||-F---J-LFJFF|.-LJ-J7FJF||||L|J.F..||F|L7JFF-7LF7||7|7||L-7LLL--J|LJ|LL.|7-LL-J-7..7JJF.7.7F7J-L.JJF|77..777LJ-7FF7F-JF7..|JF.F-L7

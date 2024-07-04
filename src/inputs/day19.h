@@ -1,11 +1,12 @@
 #include <string_view>
 
-namespace day19 {
+namespace day19
+{
 
 using namespace std::literals;
 
 inline constexpr auto sample =
-    R"(px{a<2006:qkq,m>2090:A,rfg}
+	R"(px{a<2006:qkq,m>2090:A,rfg}
 pv{a>1716:R,A}
 lnx{m>1548:A,A}
 rfg{s<537:gd,x>2440:R,A}
@@ -24,7 +25,7 @@ hdj{m>838:A,pv}
 {x=2127,m=1623,a=2188,s=1013})"sv;
 
 inline constexpr auto input =
-    R"(bl{a<740:ls,gz}
+	R"(bl{a<740:ls,gz}
 zms{m>2453:zg,s>3552:jf,lxg}
 gp{m<456:R,a<614:R,R}
 djm{a<886:A,fch}
