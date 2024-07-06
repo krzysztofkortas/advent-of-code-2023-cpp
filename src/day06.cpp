@@ -40,20 +40,16 @@ struct State
 };
 
 struct SeparatorRule : pegtl::plus<pegtl::blank>
-{
-};
+{};
 
 struct NumberRule : pegtl::plus<pegtl::digit>
-{
-};
+{};
 
 struct TimeRule : NumberRule
-{
-};
+{};
 
 struct DistanceRule : NumberRule
-{
-};
+{};
 
 struct TimeLineRule
 	: pegtl::seq<
@@ -61,8 +57,7 @@ struct TimeLineRule
 		  SeparatorRule,
 		  pegtl::list<TimeRule, SeparatorRule>,
 		  pegtl::eol>
-{
-};
+{};
 
 struct DistanceLineRule
 	: pegtl::seq<
@@ -70,17 +65,14 @@ struct DistanceLineRule
 		  SeparatorRule,
 		  pegtl::list<DistanceRule, SeparatorRule>,
 		  pegtl::eolf>
-{
-};
+{};
 
 struct Grammar : pegtl::must<TimeLineRule, DistanceLineRule>
-{
-};
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
 struct Action<TimeRule>
@@ -132,12 +124,13 @@ Race parsePart2(std::string_view input)
 int64_t getWinnings(const Race& race)
 {
 	const auto delta = race.time * race.time - 4 * race.distance;
-	const auto left = (race.time - std::sqrt(delta)) / 2;
-	const auto right = (race.time + std::sqrt(delta)) / 2;
-	const auto excludeLeft = left == static_cast<int64_t>(left) ? 1.0 : 0.0;
-	const auto excludeRight = right == static_cast<int64_t>(right) ? 1.0 : 0.0;
+	const auto left = (static_cast<double>(race.time) - std::sqrt(delta)) / 2;
+	const auto right = (static_cast<double>(race.time) + std::sqrt(delta)) / 2;
+	const auto excludeLeft = left == std::floor(left) ? 1 : 0;
+	const auto excludeRight = right == std::floor(right) ? 1 : 0;
 
-	return std::floor(right) - std::ceil(left) + 1.0 - excludeLeft - excludeRight;
+	return static_cast<int64_t>(std::floor(right)) - static_cast<int64_t>(std::ceil(left)) + 1
+		- excludeLeft - excludeRight;
 }
 
 int64_t solvePart1(std::string_view input)

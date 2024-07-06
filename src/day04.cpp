@@ -17,7 +17,7 @@ namespace vw = std::ranges::views;
 
 using std::int64_t;
 
-using Numbers = std::vector<int>;
+using Numbers = std::vector<int64_t>;
 
 struct Card
 {
@@ -34,24 +34,19 @@ namespace Parsing
 namespace pegtl = tao::pegtl;
 
 struct Digits : pegtl::plus<pegtl::digit>
-{
-};
+{};
 
 struct CardNumber : Digits
-{
-};
+{};
 
 struct WinningNumber : Digits
-{
-};
+{};
 
 struct Number : Digits
-{
-};
+{};
 
 struct Separator : pegtl::plus<pegtl::blank>
-{
-};
+{};
 
 struct Line
 	: public pegtl::seq<
@@ -66,17 +61,14 @@ struct Line
 		  Separator,
 		  pegtl::list<Number, Separator>,
 		  pegtl::eolf>
-{
-};
+{};
 
 struct File : pegtl::must<pegtl::until<pegtl::eof, Line>>
-{
-};
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
 struct Action<CardNumber>
@@ -113,8 +105,7 @@ struct Action<Number>
 
 template<typename Rule>
 struct Control : pegtl::normal<Rule>
-{
-};
+{};
 
 template<>
 struct Control<Line> : pegtl::normal<Line>
@@ -152,7 +143,7 @@ int64_t solvePart1(std::string_view input)
 	const auto cards = Parsing::parse(input);
 	return std::ranges::fold_left(
 		cards | vw::transform([](const Card& card) {
-			const int intersectionSize = getIntersectionSize(card.winningNumbers, card.numbers);
+			const int64_t intersectionSize = getIntersectionSize(card.winningNumbers, card.numbers);
 			return (1 << intersectionSize) >> 1;
 		}),
 		0,

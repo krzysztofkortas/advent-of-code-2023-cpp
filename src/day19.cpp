@@ -84,67 +84,52 @@ struct Result
 };
 
 struct Separator : pegtl::one<','>
-{
-};
+{};
 
 struct NumberRule : pegtl::plus<pegtl::digit>
-{
-};
+{};
 
 struct NameRule : pegtl::plus<pegtl::alpha>
-{
-};
+{};
 
 struct WorkflowNameRule : NameRule
-{
-};
+{};
 
 struct ConsequentRule : NameRule
-{
-};
+{};
 
 struct CategoryRule : pegtl::alpha
-{
-};
+{};
 
 struct OperatorRule : pegtl::one<'<', '>'>
-{
-};
+{};
 
 struct ValueRule : NumberRule
-{
-};
+{};
 
 struct ConditionRule : pegtl::seq<CategoryRule, OperatorRule, ValueRule>
-{
-};
+{};
 
 struct RuleRule : pegtl::seq<pegtl::opt<ConditionRule, pegtl::one<':'>>, ConsequentRule>
-{
-};
+{};
 
 struct WorkflowRule
 	: pegtl::
 		  seq<WorkflowNameRule, pegtl::one<'{'>, pegtl::list<RuleRule, Separator>, pegtl::one<'}'>>
-{
-};
+{};
 
 struct RatingCategoryRule : CategoryRule
-{
-};
+{};
 
 struct RatingValueRule : ValueRule
-{
-};
+{};
 
 struct RatingItemRule : pegtl::seq<RatingCategoryRule, pegtl::one<'='>, RatingValueRule>
-{
-};
+{};
 
 struct RatingRule
 	: pegtl::seq<pegtl::one<'{'>, pegtl::list<RatingItemRule, Separator>, pegtl::one<'}'>>
-{
-};
+{};
 
 struct Grammar
 	: pegtl::must<
@@ -153,13 +138,11 @@ struct Grammar
 		  pegtl::eol,
 		  pegtl::list<RatingRule, pegtl::eol>,
 		  pegtl::eof>
-{
-};
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
 struct Action<WorkflowNameRule>
@@ -381,14 +364,14 @@ int64_t countAccepted(const Workflow& workflow, const Workflows& workflows, Rati
 	int64_t result = 0;
 	for (const Rule& rule : workflow.rules)
 	{
-		auto count = [&](const RatingRange& ratings) {
+		auto count = [&](const RatingRange& ratingsToCount) {
 			const std::string& consequent = rule.consequent;
 			if (consequent == "A")
-				return countRatings(ratings);
+				return countRatings(ratingsToCount);
 			else if (consequent == "R")
 				return 0z;
 			else
-				return countAccepted(workflows.at(consequent), workflows, ratings);
+				return countAccepted(workflows.at(consequent), workflows, ratingsToCount);
 		};
 		if (!rule.condition)
 		{
