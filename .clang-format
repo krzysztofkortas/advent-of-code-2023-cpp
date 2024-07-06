@@ -49,7 +49,7 @@ BraceWrapping:
   BeforeWhile: false
   IndentBraces: false
   SplitEmptyFunction: true
-  SplitEmptyRecord: true
+  SplitEmptyRecord: false
   SplitEmptyNamespace: true
 BracedInitializerIndentWidth: 4
 BreakAdjacentStringLiterals: true
