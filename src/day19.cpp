@@ -357,6 +357,7 @@ std::pair<RatingRange, RatingRange> crossCondition(
 				return {
 					Range{condition.value + 1, range.end}, Range{range.start, condition.value + 1}};
 		}
+		std::unreachable();
 	}();
 	auto ratings1 = ratings;
 	auto ratings2 = ratings;
