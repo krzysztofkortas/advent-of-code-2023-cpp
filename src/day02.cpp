@@ -1,19 +1,22 @@
 #include "inputs/day02.h"
 
 #include <algorithm>
-#include <functional>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
+#include "Utils.h"
+
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 enum class Color
 {
@@ -43,136 +46,123 @@ namespace Parsing
 
 namespace pegtl = tao::pegtl;
 
-Color parseColor(std::string_view color)
+struct State
 {
-	if (color == "red")
-		return Color::red;
-	if (color == "green")
-		return Color::green;
-	if (color == "blue")
-		return Color::blue;
-
-	std::unreachable();
-}
-
-struct Number : pegtl::plus<pegtl::digit>
-{
+	Games games;
+	Game tempGame;
+	CubeSet tempCubeSet;
 };
 
-struct GameNumber : Number
-{
-};
+struct NumberRule : pegtl::plus<pegtl::digit>
+{};
 
-struct ColorCount : Number
-{
-};
+struct GameNumberRule : NumberRule
+{};
 
-struct ColorValue
+struct ColorCountRule : NumberRule
+{};
+
+struct ColorValueRule
 	: pegtl::sor<TAO_PEGTL_STRING("red"), TAO_PEGTL_STRING("blue"), TAO_PEGTL_STRING("green")>
-{
-};
+{};
 
-struct CubeSetItem : public pegtl::seq<pegtl::blank, ColorCount, pegtl::blank, ColorValue>
-{
-};
+struct CubeSetItemRule
+	: public pegtl::seq<pegtl::blank, ColorCountRule, pegtl::blank, ColorValueRule>
+{};
 
-struct Line
+struct GameRule
 	: public pegtl::seq<
 		  TAO_PEGTL_STRING("Game "),
-		  GameNumber,
+		  GameNumberRule,
 		  pegtl::one<':'>,
-		  pegtl::list<CubeSetItem, pegtl::one<',', ';'>>,
+		  pegtl::list<CubeSetItemRule, pegtl::one<',', ';'>>,
 		  pegtl::eolf>
-{
-};
+{};
 
-struct File : pegtl::must<pegtl::until<pegtl::eof, Line>>
-{
-};
+struct Grammar : pegtl::must<pegtl::until<pegtl::eof, GameRule>>
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
-struct Action<GameNumber>
+struct Action<GameNumberRule>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Games& games)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!games.empty());
-		games.back().id = std::stoi(in.string());
+		state.tempGame.id = std::stoi(in.string());
 	}
 };
 
 template<>
-struct Action<ColorCount>
+struct Action<ColorCountRule>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Games& games)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!games.empty());
-		auto& sets = games.back().sets;
-		assert(!sets.empty());
-		sets.back().count = std::stoi(in.string());
+		state.tempCubeSet.count = std::stoi(in.string());
 	}
 };
 
 template<>
-struct Action<ColorValue>
+struct Action<ColorValueRule>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Games& games)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!games.empty());
-		auto& sets = games.back().sets;
-		assert(!sets.empty());
-		sets.back().color = parseColor(in.string());
+		state.tempCubeSet.color = parseColor(in.string());
 	}
-};
 
-template<typename Rule>
-struct Control : pegtl::normal<Rule>
-{
-};
-
-template<>
-struct Control<Line> : pegtl::normal<Line>
-{
-	template<typename ParseInput>
-	static void start(ParseInput&, Games& games)
+	static Color parseColor(std::string_view color)
 	{
-		games.emplace_back();
+		if (color == "red")
+			return Color::red;
+		else if (color == "green")
+			return Color::green;
+		else if (color == "blue")
+			return Color::blue;
+
+		std::unreachable();
 	}
 };
 
 template<>
-struct Control<CubeSetItem> : pegtl::normal<CubeSetItem>
+struct Action<CubeSetItemRule>
 {
-	template<typename ParseInput>
-	static void start(ParseInput&, Games& games)
+	static void apply0(State& state)
 	{
-		assert(!games.empty());
-		games.back().sets.emplace_back();
+		state.tempGame.sets.push_back(std::move(state.tempCubeSet));
+		state.tempCubeSet = {};
+	}
+};
+
+template<>
+struct Action<GameRule>
+{
+	static void apply0(State& state)
+	{
+		state.games.push_back(std::move(state.tempGame));
+		state.tempGame = {};
 	}
 };
 
 Games parse(std::string_view input)
 {
-	Games games;
+	State state;
 	pegtl::memory_input in{input, ""};
-	pegtl::parse<File, Action, Control>(in, games);
-	return games;
+	pegtl::parse<Grammar, Action>(in, state);
+	return state.games;
 }
 
 } // namespace Parsing
 
 struct MaxCount
 {
-	int red;
-	int green;
-	int blue;
+	int red{};
+	int green{};
+	int blue{};
 };
 
 MaxCount getMaxCount(const CubeSets& sets)
@@ -180,10 +170,10 @@ MaxCount getMaxCount(const CubeSets& sets)
 	auto getMaxForColor = [&](Color color) {
 		auto filtered = sets | vw::filter([&](const CubeSet& set) { return set.color == color; });
 		assert(!filtered.empty());
-		return std::ranges::max(filtered, {}, &CubeSet::count).count;
+		return rng::max(filtered | vw::transform(&CubeSet::count));
 	};
 
-	return {
+	return MaxCount{
 		.red = getMaxForColor(Color::red),
 		.green = getMaxForColor(Color::green),
 		.blue = getMaxForColor(Color::blue)};
@@ -191,26 +181,22 @@ MaxCount getMaxCount(const CubeSets& sets)
 
 int solvePart1(std::string_view input)
 {
-	const auto games = Parsing::parse(input);
-	return std::ranges::fold_left(
+	const Games games = Parsing::parse(input);
+	return Utils::sum(
 		games | vw::filter([](const Game& game) {
-			const auto max = getMaxCount(game.sets);
-			return max.red <= 12 && max.green <= 13 && max.blue <= 14;
-		}) | vw::transform(&Game::id),
-		0,
-		std::plus{});
+			const MaxCount maxCount = getMaxCount(game.sets);
+			return maxCount.red <= 12 && maxCount.green <= 13 && maxCount.blue <= 14;
+		})
+		| vw::transform(&Game::id));
 }
 
 int solvePart2(std::string_view input)
 {
-	const auto games = Parsing::parse(input);
-	return std::ranges::fold_left(
-		games | vw::transform([](const Game& game) {
-			const auto max = getMaxCount(game.sets);
-			return max.red * max.green * max.blue;
-		}),
-		0,
-		std::plus{});
+	const Games games = Parsing::parse(input);
+	return Utils::sum(games | vw::transform([](const Game& game) {
+						  const MaxCount maxCount = getMaxCount(game.sets);
+						  return maxCount.red * maxCount.green * maxCount.blue;
+					  }));
 }
 
 TEST(day02, test)
