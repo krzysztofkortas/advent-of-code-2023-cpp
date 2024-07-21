@@ -19,11 +19,18 @@ add_compile_options(
   -Wunused # warn on anything being unused
   -Woverloaded-virtual # warn if you overload (not override) a virtual function
   -Wpedantic # warn if non-standard C++ is used
+  -Wconversion # warn on type conversions that may lose data
   -Wnull-dereference # warn if a null dereference is detected
   -Wdouble-promotion # warn if float is implicit promoted to double
   -Wformat=2 # warn on security issues around functions that format output (ie printf)
   -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
 )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(
+    -Wno-sign-conversion # disable the sign-conversion warning that comes with -Wconversion in Clang
+  )
+endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(
@@ -33,7 +40,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
     -Wuseless-cast # warn if you perform a cast to the same type
     -Wsuggest-override # warn if an overridden member function is not marked 'override' or 'final'
-    -Wconversion # warn on type conversions that may lose data
   )
 endif()
 
