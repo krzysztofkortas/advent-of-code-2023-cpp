@@ -29,3 +29,8 @@ RUN set -ex;\
 
 ENV VCPKG_ROOT=/home/$USERNAME/vcpkg
 ENV PATH="${VCPKG_ROOT}:${PATH}"
+
+# cmake-format
+RUN set -ex; \
+    sudo apt-get update; \
+    sudo apt-get install -y cmake-format
