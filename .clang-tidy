@@ -1,0 +1,29 @@
+---
+Checks: "*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        -fuchsia-*,
+        -google-*,
+        -hicpp-*,
+        -llvm*,
+        -zircon-*,
+        -bugprone-easily-swappable-parameters,
+        -misc-no-recursion,
+        -modernize-use-trailing-return-type,
+        -performance-enum-size,
+        -readability-braces-around-statements,
+        -readability-else-after-return,
+        -readability-identifier-length,
+        -readability-named-parameter,
+"
+WarningsAsErrors: '*'
+FormatStyle: file
+
+CheckOptions:
+  - key: misc-include-cleaner.IgnoreHeaders
+    value: 'tao/.*\.hpp'
+  - key: readability-magic-numbers.IgnoredIntegerValues
+    value: '1;2;3;4;5'
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues
+    value: '1;2;3;4;5'

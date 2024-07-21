@@ -1,6 +1,7 @@
 #include "inputs/day02.h"
 
 #include <algorithm>
+#include <cassert>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -27,7 +28,7 @@ enum class Color
 
 struct CubeSet
 {
-	Color color;
+	Color color{};
 	int count{};
 };
 
@@ -133,7 +134,7 @@ struct Action<CubeSetItemRule>
 {
 	static void apply0(State& state)
 	{
-		state.tempGame.sets.push_back(std::move(state.tempCubeSet));
+		state.tempGame.sets.push_back(state.tempCubeSet);
 		state.tempCubeSet = {};
 	}
 };
@@ -182,10 +183,13 @@ MaxCount getMaxCount(const CubeSets& sets)
 int solvePart1(std::string_view input)
 {
 	const Games games = Parsing::parse(input);
+	constexpr int maxRed = 12;
+	constexpr int maxGreen = 12;
+	constexpr int maxBlue = 12;
 	return Utils::sum(
 		games | vw::filter([](const Game& game) {
 			const MaxCount maxCount = getMaxCount(game.sets);
-			return maxCount.red <= 12 && maxCount.green <= 13 && maxCount.blue <= 14;
+			return maxCount.red <= maxRed && maxCount.green <= maxGreen && maxCount.blue <= maxBlue;
 		})
 		| vw::transform(&Game::id));
 }

@@ -3,14 +3,16 @@
 #include <algorithm>
 #include <concepts>
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <ranges>
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include "Utils.h"
 
 namespace
 {
@@ -25,13 +27,14 @@ using Pattern = std::vector<std::string>;
 int64_t getHorizontalReflection(
 	const Pattern& pattern, std::optional<int64_t> ignore = std::nullopt)
 {
+	constexpr int multiplier = 100;
 	for (auto i : vw::iota(1z, std::ssize(pattern)))
 	{
 		const auto size = std::min(i, std::ssize(pattern) - i);
 		const auto upper = std::span{pattern}.subspan(i - size, size);
 		const auto bottom = std::span{pattern}.subspan(i, size);
-		if (std::ranges::equal(upper, bottom | vw::reverse) && 100 * i != ignore)
-			return 100 * i;
+		if (std::ranges::equal(upper, bottom | vw::reverse) && multiplier * i != ignore)
+			return multiplier * i;
 	}
 	return 0;
 }
@@ -57,12 +60,10 @@ int64_t getVerticalReflection(const Pattern& pattern, std::optional<int64_t> ign
 
 int64_t solve(std::string_view input, std::invocable<Pattern> auto getReflection)
 {
-	return std::ranges::fold_left(
-		input | vw::split("\n\n"sv) | vw::transform([&](auto&& pattern) {
-			return getReflection(pattern | vw::split('\n') | std::ranges::to<Pattern>());
-		}),
-		0,
-		std::plus<>{});
+	return Utils::sum(input | vw::split("\n\n"sv) | vw::transform([&](auto&& pattern) {
+						  return getReflection(
+							  pattern | vw::split('\n') | std::ranges::to<Pattern>());
+					  }));
 	return 1;
 }
 

@@ -1,10 +1,8 @@
 #include "inputs/day18.h"
 
-#include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <cstdint>
-#include <functional>
-#include <optional>
-#include <queue>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -13,6 +11,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+
 
 namespace
 {
@@ -54,7 +53,8 @@ int64_t solvePart1(std::string_view input)
 		const int64_t meters = std::stoll(v[1]);
 		circuit += meters;
 		const Position currentPoint{
-			previousPoint.first + meters * dir.first, previousPoint.second + meters * dir.second};
+			previousPoint.first + (meters * dir.first),
+			previousPoint.second + (meters * dir.second)};
 		area +=
 			previousPoint.first * currentPoint.second - previousPoint.second * currentPoint.first;
 
@@ -80,7 +80,8 @@ int64_t solvePart2(std::string_view input)
 		const int64_t meters = std::stoll(encodedMeters, nullptr, 16);
 		circuit += meters;
 		const Position currentPoint{
-			previousPoint.first + meters * dir.first, previousPoint.second + meters * dir.second};
+			previousPoint.first + (meters * dir.first),
+			previousPoint.second + (meters * dir.second)};
 		area +=
 			previousPoint.first * currentPoint.second - previousPoint.second * currentPoint.first;
 

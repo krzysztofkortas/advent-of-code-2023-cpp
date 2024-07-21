@@ -3,12 +3,17 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <ranges>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+#include "Utils.h"
 
 namespace
 {
@@ -18,10 +23,12 @@ namespace vw = std::ranges::views;
 using std::int64_t;
 using std::operator""sv;
 
+constexpr int numberOfCards = 5;
+
 struct Hand
 {
 	std::string cards;
-	int64_t bid;
+	int64_t bid{};
 };
 
 using Hands = std::vector<Hand>;
@@ -37,26 +44,21 @@ struct State
 	Hand currentHand;
 };
 
-struct CardsRule : pegtl::rep<5, pegtl::alnum>
-{
-};
+struct CardsRule : pegtl::rep<numberOfCards, pegtl::alnum>
+{};
 
 struct BidRule : pegtl::plus<pegtl::digit>
-{
-};
+{};
 
 struct LineRule : pegtl::seq<CardsRule, pegtl::blank, BidRule, pegtl::eolf>
-{
-};
+{};
 
 struct Grammar : pegtl::must<pegtl::until<pegtl::eof, LineRule>>
-{
-};
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
 struct Action<CardsRule>
@@ -120,16 +122,17 @@ HandType getHandType(const Hand& hand)
 	if (count.empty())
 		return HandType::Five;
 
-	count.at(0) += jokers;
+	const auto first = count.at(0) + jokers;
+	const auto second = count.at(1);
 
-	if (count.at(0) == 5)
+	if (first == 5)
 		return HandType::Five;
-	else if (count.at(0) == 4)
+	else if (first == 4)
 		return HandType::Four;
-	else if (count.at(0) == 3)
-		return count.at(1) == 2 ? HandType::Full : HandType::Three;
-	else if (count.at(0) == 2)
-		return count.at(1) == 2 ? HandType::TwoPair : HandType::OnePair;
+	else if (first == 3)
+		return second == 2 ? HandType::Full : HandType::Three;
+	else if (first == 2)
+		return second == 2 ? HandType::TwoPair : HandType::OnePair;
 
 	return HandType::highCard;
 }
@@ -152,13 +155,10 @@ int64_t getOverallRating(Hands hands)
 		return getCardValues(lhs.cards) < getCardValues(rhs.cards);
 	});
 
-	return std::ranges::fold_left(
-		hands | vw::enumerate | vw::transform([](const auto& p) {
-			const auto& [index, hand] = p;
-			return (index + 1) * hand.bid;
-		}),
-		0,
-		std::plus{});
+	return Utils::sum(hands | vw::enumerate | vw::transform([](const auto& p) {
+						  const auto& [index, hand] = p;
+						  return (index + 1) * hand.bid;
+					  }));
 }
 
 int64_t solvePart1(std::string_view input)

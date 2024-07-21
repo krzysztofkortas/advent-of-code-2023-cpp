@@ -1,8 +1,7 @@
 #include "inputs/day19.h"
 
-#include <algorithm>
 #include <cstdint>
-#include <functional>
+#include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -12,6 +11,8 @@
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+#include "Utils.h"
 
 namespace
 {
@@ -39,7 +40,7 @@ enum class Operator
 struct Condition
 {
 	char category{};
-	Operator op;
+	Operator op{};
 	int64_t value{};
 };
 
@@ -181,8 +182,9 @@ struct Action<OperatorRule>
 				return Operator::less;
 			case '>':
 				return Operator::greater;
+			default:
+				std::unreachable();
 		}
-		std::unreachable();
 	}
 };
 
@@ -318,13 +320,11 @@ int64_t solvePart1(std::string_view input)
 {
 	const auto [workflows, ratings] = Parsing::parse(input);
 	const Workflow& startWorkflow = workflows.at("in");
-	return std::ranges::fold_left(
+	return Utils::sum(
 		ratings | vw::filter([&](const Rating& rating) {
 			return isWorkflowAccepted(startWorkflow, workflows, rating);
-		}) | vw::transform(vw::values)
-			| vw::join,
-		0,
-		std::plus{});
+		})
+		| vw::transform(vw::values) | vw::join);
 }
 
 std::pair<RatingRange, RatingRange> crossCondition(
@@ -335,10 +335,13 @@ std::pair<RatingRange, RatingRange> crossCondition(
 		switch (condition.op)
 		{
 			case Operator::less:
-				return {Range{range.start, condition.value}, Range{condition.value, range.end}};
+				return {
+					Range{.start = range.start, .end = condition.value},
+					Range{.start = condition.value, .end = range.end}};
 			case Operator::greater:
 				return {
-					Range{condition.value + 1, range.end}, Range{range.start, condition.value + 1}};
+					Range{.start = condition.value + 1, .end = range.end},
+					Range{.start = range.start, .end = condition.value + 1}};
 		}
 		std::unreachable();
 	}();
@@ -352,11 +355,9 @@ std::pair<RatingRange, RatingRange> crossCondition(
 
 int64_t countRatings(const RatingRange& ratings)
 {
-	return std::ranges::fold_left(
-		ratings | vw::values
-			| vw::transform([](const Range& range) { return range.end - range.start; }),
-		1,
-		std::multiplies{});
+	return Utils::multiply(ratings | vw::values | vw::transform([](const Range& range) {
+							   return range.end - range.start;
+						   }));
 }
 
 int64_t countAccepted(const Workflow& workflow, const Workflows& workflows, RatingRange ratings)
@@ -390,7 +391,7 @@ int64_t countAccepted(const Workflow& workflow, const Workflows& workflows, Rati
 int64_t solvePart2(std::string_view input)
 {
 	const auto [workflows, _] = Parsing::parse(input);
-	const Range range{1, 4001};
+	const Range range{.start = 1, .end = 4001};
 	const RatingRange ratings =
 		vw::zip("xmas", vw::repeat(range, 4)) | std::ranges::to<RatingRange>();
 	return countAccepted(workflows.at("in"), workflows, ratings);

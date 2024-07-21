@@ -67,6 +67,14 @@
             }
         },
         {
+            "name": "clang-debug-clang-tidy",
+            "inherits": "clang-debug",
+            "displayName": "clang Debug with clang-tidy",
+            "cacheVariables": {
+                "ENABLE_CLANG_TIDY": true
+            }
+        },
+        {
             "name": "clang-release",
             "inherits": "clang-common",
             "displayName": "clang Release",

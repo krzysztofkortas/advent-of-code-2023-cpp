@@ -37,6 +37,21 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   )
 endif()
 
+if (ENABLE_CLANG_TIDY)
+  find_program(CLANGTIDY clang-tidy-19)
+
+  set(CLANG_TIDY_OPTIONS
+    ${CLANGTIDY}
+    -extra-arg=-Wno-unknown-warning-option
+    -extra-arg=-Wno-ignored-optimization-argument
+    -extra-arg=-Wno-unused-command-line-argument
+    -extra-arg=-std=c++${CMAKE_CXX_STANDARD}
+    -p
+  )
+
+  set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_OPTIONS})
+endif()
+
 include(CTest)
 
 find_package(GTest CONFIG REQUIRED)

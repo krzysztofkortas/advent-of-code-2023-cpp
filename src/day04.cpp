@@ -1,14 +1,17 @@
 #include "inputs/day04.h"
 
 #include <algorithm>
-#include <cstddef>
-#include <functional>
+#include <cassert>
+#include <cstdint>
 #include <iterator>
 #include <ranges>
+#include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+#include "Utils.h"
 
 namespace
 {
@@ -141,13 +144,11 @@ auto getIntersectionSize(ContainerT lhs, ContainerT rhs)
 int64_t solvePart1(std::string_view input)
 {
 	const auto cards = Parsing::parse(input);
-	return std::ranges::fold_left(
-		cards | vw::transform([](const Card& card) {
-			const int64_t intersectionSize = getIntersectionSize(card.winningNumbers, card.numbers);
-			return (1 << intersectionSize) >> 1;
-		}),
-		0,
-		std::plus<>{});
+	return Utils::sum(cards | vw::transform([](const Card& card) {
+						  const int64_t intersectionSize =
+							  getIntersectionSize(card.winningNumbers, card.numbers);
+						  return (1 << intersectionSize) >> 1;
+					  }));
 }
 
 int64_t solvePart2(std::string_view input)
@@ -163,7 +164,7 @@ int64_t solvePart2(std::string_view input)
 		}
 	}
 
-	return std::ranges::fold_left(cardsCount, 0, std::plus<>{});
+	return Utils::sum(cardsCount);
 }
 
 TEST(day04, test)

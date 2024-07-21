@@ -1,14 +1,16 @@
 #include "inputs/day06.h"
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+#include "Utils.h"
 
 namespace
 {
@@ -123,7 +125,7 @@ Race parsePart2(std::string_view input)
 
 int64_t getWinnings(const Race& race)
 {
-	const auto delta = race.time * race.time - 4 * race.distance;
+	const auto delta = (race.time * race.time) - (4 * race.distance);
 	const auto left = (static_cast<double>(race.time) - std::sqrt(delta)) / 2;
 	const auto right = (static_cast<double>(race.time) + std::sqrt(delta)) / 2;
 	const auto excludeLeft = left == std::floor(left) ? 1 : 0;
@@ -136,7 +138,7 @@ int64_t getWinnings(const Race& race)
 int64_t solvePart1(std::string_view input)
 {
 	const Races races = Parsing::parsePart1(input);
-	return std::ranges::fold_left(races | vw::transform(getWinnings), 1, std::multiplies<>{});
+	return Utils::multiply(races | vw::transform(getWinnings));
 }
 
 int64_t solvePart2(std::string_view input)

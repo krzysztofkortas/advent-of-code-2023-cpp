@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <ranges>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -86,7 +87,7 @@ int64_t solvePart2(std::string_view input, int64_t steps)
 	answers[0] = 1;
 
 	const int64_t modulo = steps % width;
-	const int64_t precalculatedSteps = std::min(steps, (modulo + 3 * width));
+	const int64_t precalculatedSteps = std::min(steps, (modulo + (3 * width)));
 
 	while (distance < precalculatedSteps)
 	{
@@ -117,15 +118,15 @@ int64_t solvePart2(std::string_view input, int64_t steps)
 	if (steps <= precalculatedSteps)
 		return answers[steps];
 
-	answers = {answers[modulo], answers[modulo + width], answers[modulo + 2 * width]};
+	answers = {answers[modulo], answers[modulo + width], answers[modulo + (2 * width)]};
 
 	int64_t answersSize = 3;
 	const int64_t neededSteps = (steps + width - 1) / width;
-	const int64_t diff = answers[2] - 2 * answers[1] + answers[0];
+	const int64_t diff = answers[2] - (2 * answers[1]) + answers[0];
 
 	while (answersSize < neededSteps)
 	{
-		answers.push_back(diff + 2 * answers[answersSize - 1] - answers[answersSize - 2]);
+		answers.push_back(diff + (2 * answers[answersSize - 1]) - answers[answersSize - 2]);
 		++answersSize;
 	}
 

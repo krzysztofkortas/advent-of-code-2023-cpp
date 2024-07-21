@@ -1,9 +1,8 @@
 #include "inputs/day17.h"
 
-#include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <optional>
+#include <map>
 #include <queue>
 #include <ranges>
 #include <string>
@@ -26,13 +25,18 @@ using Direction = std::pair<int64_t, int64_t>;
 using Position = std::pair<int64_t, int64_t>;
 using Key = std::pair<Position, Direction>;
 
+bool isValid(const Position& pos, int64_t width, int64_t height)
+{
+	return pos.first > 0 && pos.first <= height && pos.second > 0 && pos.second <= width;
+}
+
 int64_t getHeatLoss(const Grid& grid, int64_t minDistance, int64_t maxDistance)
 {
 	const int64_t height = std::ssize(grid);
 	const int64_t width = std::ssize(grid.at(0));
 	std::map<Key, int64_t> distMap;
 	using QueueKey = std::pair<int64_t, Key>;
-	std::priority_queue<QueueKey, std::vector<QueueKey>, std::greater<QueueKey>> pq;
+	std::priority_queue<QueueKey, std::vector<QueueKey>, std::greater<>> pq;
 	pq.push({0, {{0, 0}, {0, 0}}});
 
 	while (!pq.empty())
@@ -49,15 +53,12 @@ int64_t getHeatLoss(const Grid& grid, int64_t minDistance, int64_t maxDistance)
 				continue;
 			int64_t nextCost = cost;
 
-			for (int64_t distance : vw::iota(1, maxDistance + 1))
+			for (const int64_t distance : vw::iota(1, maxDistance + 1))
 			{
 				const Position nextPos{
-					pos.first + distance * d.first, pos.second + (distance * d.second)};
-				if (std::min(nextPos.first, nextPos.second) < 0 || nextPos.first >= height
-					|| nextPos.second >= width)
-				{
+					pos.first + (distance * d.first), pos.second + (distance * d.second)};
+				if (!isValid(nextPos, width, height))
 					continue;
-				}
 
 				nextCost += grid.at(nextPos.first).at(nextPos.second);
 				if (distance < minDistance)
@@ -89,12 +90,16 @@ int64_t solve(std::string_view input, int64_t minDistance, int64_t maxDistance)
 
 int64_t solvePart1(std::string_view input)
 {
-	return solve(input, 1, 3);
+	constexpr int minDistance = 1;
+	constexpr int maxDistance = 3;
+	return solve(input, minDistance, maxDistance);
 }
 
 int64_t solvePart2(std::string_view input)
 {
-	return solve(input, 4, 10);
+	constexpr int minDistance = 4;
+	constexpr int maxDistance = 10;
+	return solve(input, minDistance, maxDistance);
 }
 
 TEST(day17, test)

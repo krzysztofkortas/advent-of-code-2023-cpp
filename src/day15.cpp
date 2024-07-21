@@ -1,8 +1,9 @@
 #include "inputs/day15.h"
 
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <ranges>
 #include <regex>
@@ -13,6 +14,8 @@
 
 #include <gtest/gtest.h>
 
+#include "Utils.h"
+
 namespace
 {
 
@@ -20,17 +23,20 @@ namespace vw = std::ranges::views;
 
 using std::int64_t;
 
+constexpr int multiplier = 17;
+constexpr int modulo = 256;
+
 constexpr auto getHash = [](std::ranges::input_range auto&& range) {
 	int64_t result = 0;
 	for (auto c : range)
-		result = (17 * (result + c)) % 256;
+		result = (multiplier * (result + c)) % modulo;
 
-	return result % 256;
+	return result % modulo;
 };
 
 int64_t solvePart1(std::string_view input)
 {
-	return std::ranges::fold_left(input | vw::split(',') | vw::transform(getHash), 0z, std::plus{});
+	return Utils::sum(input | vw::split(',') | vw::transform(getHash));
 }
 
 enum class Operation
@@ -47,8 +53,9 @@ Operation makeOperation(char c)
 			return Operation::dash;
 		case '=':
 			return Operation::equal;
+		default:
+			std::unreachable();
 	}
-	std::unreachable();
 }
 
 struct Step
@@ -59,7 +66,7 @@ struct Step
 };
 
 using Steps = std::vector<Step>;
-using HashMap = std::array<Steps, 256>;
+using HashMap = std::array<Steps, modulo>;
 
 Step makeStep(const std::string& step)
 {
@@ -114,7 +121,10 @@ int64_t solvePart2(std::string_view input)
 	for (const auto& [boxNumber, vec] : haspMap | vw::enumerate)
 	{
 		for (const auto& [index, step] : vec | vw::enumerate)
+		{
+			assert(step.focalLength);
 			result += (boxNumber + 1) * (index + 1) * step.focalLength.value();
+		}
 	}
 	return result;
 }

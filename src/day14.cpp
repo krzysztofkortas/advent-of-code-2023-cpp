@@ -2,13 +2,15 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <functional>
 #include <map>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include "Utils.h"
 
 namespace
 {
@@ -21,18 +23,15 @@ using Map = std::vector<std::string>;
 
 int64_t calculateLoad(const Map& map)
 {
-	return std::ranges::fold_left(
-		map | vw::transform([](const std::string& line) {
-			int64_t result = 0;
-			for (const auto& [index, c] : line | vw::enumerate)
-			{
-				if (c == 'O')
-					result += std::ssize(line) - index;
-			}
-			return result;
-		}),
-		0,
-		std::plus{});
+	return Utils::sum(map | vw::transform([](const std::string& line) {
+						  int64_t result = 0;
+						  for (const auto& [index, c] : line | vw::enumerate)
+						  {
+							  if (c == 'O')
+								  result += std::ssize(line) - index;
+						  }
+						  return result;
+					  }));
 }
 
 Map moveRocks(const Map& map)
@@ -103,7 +102,7 @@ int64_t solvePart2(std::string_view input)
 		if (auto it = visited.find(map); it != visited.end())
 		{
 			const int64_t cycleLen = i - it->second;
-			const int64_t resIndex = it->second + (numberOfSteps - i) % cycleLen;
+			const int64_t resIndex = it->second + ((numberOfSteps - i) % cycleLen);
 			return results.at(resIndex);
 		}
 		else

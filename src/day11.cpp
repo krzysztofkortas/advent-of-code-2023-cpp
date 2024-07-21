@@ -1,8 +1,10 @@
 #include "inputs/day11.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -65,7 +67,7 @@ int64_t getDistance(
 	const auto max = std::max(lhs, rhs);
 
 	auto result = max - min;
-	for (int64_t x : empty)
+	for (const int64_t x : empty)
 	{
 		if (x >= min && x <= max)
 			result += emptyMultiplier - 1;
@@ -103,7 +105,8 @@ int64_t solvePart1(std::string_view input)
 
 int64_t solvePart2(std::string_view input)
 {
-	return calculate(input, 1000000);
+	constexpr int emptyMultiplier = 1000000;
+	return calculate(input, emptyMultiplier);
 }
 
 TEST(day11, test)

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
 #include <ranges>
 #include <string_view>
@@ -49,32 +48,25 @@ struct State
 };
 
 struct NumberRule : pegtl::plus<pegtl::digit>
-{
-};
+{};
 
 struct SeedRule : NumberRule
-{
-};
+{};
 
 struct SeedsRule : pegtl::seq<TAO_PEGTL_STRING("seeds: "), pegtl::list<SeedRule, pegtl::blank>>
-{
-};
+{};
 
 struct MapNameRule : pegtl::plus<pegtl::print>
-{
-};
+{};
 
 struct DestinationRangeStartRule : NumberRule
-{
-};
+{};
 
 struct SourceRangeStartRule : NumberRule
-{
-};
+{};
 
 struct RangeLengthRule : NumberRule
-{
-};
+{};
 
 struct MapItemRule
 	: pegtl::seq<
@@ -83,21 +75,17 @@ struct MapItemRule
 		  SourceRangeStartRule,
 		  pegtl::blank,
 		  RangeLengthRule>
-{
-};
+{};
 
 struct MapRule : pegtl::seq<MapNameRule, pegtl::eol, pegtl::list<MapItemRule, pegtl::eol>>
-{
-};
+{};
 
 struct Grammar : pegtl::must<SeedsRule, pegtl::until<pegtl::eof, pegtl::pad<MapRule, pegtl::space>>>
-{
-};
+{};
 
 template<typename Rule>
 struct Action : pegtl::nothing<Rule>
-{
-};
+{};
 
 template<>
 struct Action<SeedRule>
@@ -194,7 +182,7 @@ struct SeedRange
 	int64_t start{};
 	int64_t end{};
 
-	auto operator<=>(const SeedRange&) const = default;
+	friend auto operator<=>(const SeedRange&, const SeedRange&) = default;
 };
 
 using SeedRanges = std::vector<SeedRange>;

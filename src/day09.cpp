@@ -3,13 +3,15 @@
 #include <algorithm>
 #include <concepts>
 #include <cstdint>
-#include <functional>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include "Utils.h"
 
 namespace
 {
@@ -20,17 +22,15 @@ using std::int64_t;
 
 int64_t solve(std::string_view input, std::invocable<std::vector<int64_t>> auto getValue)
 {
-	return std::ranges::fold_left(
-		input | vw::split('\n') | vw::transform([&](auto&& line) {
-			std::vector<int64_t> history =
-				line | vw::split(' ') | vw::transform([](auto&& value) {
-					return static_cast<int64_t>(std::stoll(value | std::ranges::to<std::string>()));
-				})
-				| std::ranges::to<std::vector>();
-			return getValue(std::move(history));
-		}),
-		0,
-		std::plus<>{});
+	return Utils::sum(input | vw::split('\n') | vw::transform([&](auto&& line) {
+						  std::vector<int64_t> history =
+							  line | vw::split(' ') | vw::transform([](auto&& value) {
+								  return static_cast<int64_t>(
+									  std::stoll(value | std::ranges::to<std::string>()));
+							  })
+							  | std::ranges::to<std::vector>();
+						  return getValue(std::move(history));
+					  }));
 }
 
 int64_t solvePart1(std::string_view input)

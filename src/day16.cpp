@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <optional>
 #include <ranges>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -34,7 +35,7 @@ struct Position
 	int64_t row{};
 	int64_t col{};
 
-	auto operator<=>(const Position&) const = default;
+	friend auto operator<=>(const Position&, const Position&) = default;
 };
 
 struct Beam
@@ -42,7 +43,7 @@ struct Beam
 	Position position;
 	Direction direction;
 
-	auto operator<=>(const Beam&) const = default;
+	friend auto operator<=>(const Beam&, const Beam&) = default;
 };
 
 using Visited = std::set<Beam>;
@@ -50,10 +51,10 @@ using Visited = std::set<Beam>;
 Position getPosDiff(Direction direction)
 {
 	static const std::unordered_map<Direction, Position> diff{
-		{Direction::top, {-1, 0}},
-		{Direction::bottom, {1, 0}},
-		{Direction::left, {0, -1}},
-		{Direction::right, {0, 1}}};
+		{Direction::top, {.row = -1, .col = 0}},
+		{Direction::bottom, {.row = 1, .col = 0}},
+		{Direction::left, {.row = 0, .col = -1}},
+		{Direction::right, {.row = 0, .col = 1}}};
 
 	return diff.at(direction);
 }
@@ -61,7 +62,8 @@ Position getPosDiff(Direction direction)
 std::optional<Beam> getNewBeam(const Beam& beam, Direction direction, int64_t maxSize)
 {
 	const auto diff = getPosDiff(direction);
-	const Position position{beam.position.row + diff.row, beam.position.col + diff.col};
+	const Position position{
+		.row = beam.position.row + diff.row, .col = beam.position.col + diff.col};
 	if (std::min(position.row, position.col) < 0 || std::max(position.row, position.col) >= maxSize)
 	{
 		return std::nullopt;
@@ -147,7 +149,8 @@ int64_t solvePart1(std::string_view input)
 {
 	const Map map = readMap(input);
 
-	return getEnergizedTiles(map, Beam{.position = {0, 0}, .direction = Direction::right});
+	return getEnergizedTiles(
+		map, Beam{.position = {.row = 0, .col = 0}, .direction = Direction::right});
 }
 
 int64_t solvePart2(std::string_view input)
@@ -155,19 +158,19 @@ int64_t solvePart2(std::string_view input)
 	const Map map = readMap(input);
 	const int64_t maxLen = std::ssize(map);
 
-	return std::ranges::max(vw::iota(0z, maxLen) | vw::transform([&](int64_t i) {
-								const auto beams = {
-									Beam{.position = {i, 0}, .direction = Direction::right},
-									Beam{.position = {i, maxLen - 1}, .direction = Direction::left},
-									Beam{.position = {0, i}, .direction = Direction::bottom},
-									Beam{.position = {maxLen - 1, i}, .direction = Direction::top},
-								};
+	return std::ranges::max(
+		vw::iota(0z, maxLen) | vw::transform([&](int64_t i) {
+			const auto beams = {
+				Beam{.position = {.row = i, .col = 0}, .direction = Direction::right},
+				Beam{.position = {.row = i, .col = maxLen - 1}, .direction = Direction::left},
+				Beam{.position = {.row = 0, .col = i}, .direction = Direction::bottom},
+				Beam{.position = {.row = maxLen - 1, .col = i}, .direction = Direction::top},
+			};
 
-								return std::ranges::max(
-									beams | vw::transform([&](const Beam& beam) {
+			return std::ranges::max(beams | vw::transform([&](const Beam& beam) {
 										return getEnergizedTiles(map, beam);
 									}));
-							}));
+		}));
 }
 
 TEST(day16, test)

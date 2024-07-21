@@ -1,11 +1,13 @@
 #include "inputs/day10.h"
 
 #include <algorithm>
-#include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <ranges>
 #include <set>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -25,14 +27,14 @@ struct Position
 {
 	int64_t row{};
 	int64_t col{};
-	auto operator<=>(const Position&) const = default;
+	friend auto operator<=>(const Position&, const Position&) = default;
 };
 
 struct Connection
 {
 	Position begin;
 	Position end;
-	auto operator<=>(const Connection&) const = default;
+	friend auto operator<=>(const Connection&, const Connection&) = default;
 };
 
 using Grid = std::vector<std::string>;
@@ -55,13 +57,17 @@ public:
 		Path cycle;
 		Position lastPos = start;
 		Position currentPos = start;
-		do
+		while (currentPos != start || cycle.empty())
 		{
 			bool anyConnected = false;
-			for (const auto& direction : {Position{-1, 0}, {0, -1}, {0, 1}, {1, 0}})
+			for (const auto& direction :
+				 {Position{.row = -1, .col = 0},
+				  {.row = 0, .col = -1},
+				  {.row = 0, .col = 1},
+				  {.row = 1, .col = 0}})
 			{
 				const Position newPos{
-					currentPos.row + direction.row, currentPos.col + direction.col};
+					.row = currentPos.row + direction.row, .col = currentPos.col + direction.col};
 				if (newPos != lastPos && connections_.contains({currentPos, newPos}))
 				{
 					cycle.emplace_back(currentPos, newPos);
@@ -73,9 +79,7 @@ public:
 			}
 			if (!anyConnected)
 				return {};
-
-		} while (currentPos != start);
-
+		}
 		return cycle;
 	}
 
@@ -86,7 +90,7 @@ private:
 		{
 			for (const auto& [colIndex, _] : row | vw::enumerate)
 			{
-				const Position pos{rowIndex, colIndex};
+				const Position pos{.row = rowIndex, .col = colIndex};
 				makeVerticalConnections(pos);
 				makeHorizontalConnections(pos);
 			}
@@ -95,7 +99,7 @@ private:
 
 	void makeVerticalConnections(const Position& pos)
 	{
-		const Position bottomPos{pos.row + 1, pos.col};
+		const Position bottomPos{.row = pos.row + 1, .col = pos.col};
 		if (bottomPos.row >= std::ssize(grid_))
 			return;
 		const char topTile = grid_.at(pos.row).at(pos.col);
@@ -109,7 +113,7 @@ private:
 
 	void makeHorizontalConnections(const Position& pos)
 	{
-		const Position rightPos{pos.row, pos.col + 1};
+		const Position rightPos{.row = pos.row, .col = pos.col + 1};
 		if (rightPos.col >= std::ssize(grid_.at(0)))
 			return;
 		const char leftTile = grid_.at(pos.row).at(pos.col);
@@ -132,7 +136,7 @@ Position getStartingPosition(const Grid& grid)
 		for (const auto& [colIndex, c] : row | vw::enumerate)
 		{
 			if (c == 'S')
-				return {rowIndex, colIndex};
+				return {.row = rowIndex, .col = colIndex};
 		}
 	}
 
@@ -154,7 +158,7 @@ std::pair<Path, Grid> getMaxCycle(std::string_view input)
 
 int64_t solvePart1(std::string_view input)
 {
-	return (getMaxCycle(input).first.size() + 1) / 2;
+	return (ssize(getMaxCycle(input).first) + 1) / 2;
 }
 
 bool isInsideCycle(const Position& pos, const Grid& grid, const std::set<Connection>& cycle)
@@ -164,10 +168,11 @@ bool isInsideCycle(const Position& pos, const Grid& grid, const std::set<Connect
 
 	int64_t intersections = 0;
 
-	for (int64_t y : vw::iota(pos.col + 1, std::ssize(grid[0])))
+	for (const int64_t y : vw::iota(pos.col + 1, std::ssize(grid[0])))
 	{
-		const Connection con = {{pos.row, y}, {pos.row - 1, y}};
-		const Connection conRev = {con.end, con.begin};
+		const Connection con = {
+			.begin = {.row = pos.row, .col = y}, .end = {.row = pos.row - 1, .col = y}};
+		const Connection conRev = {.begin = con.end, .end = con.begin};
 
 		if (cycle.contains(con) || cycle.contains(conRev))
 			++intersections;
@@ -192,7 +197,7 @@ int64_t solvePart2(std::string_view input)
 	{
 		for (const auto& [colIndex, _] : row | vw::enumerate)
 		{
-			const Position pos{rowIndex, colIndex};
+			const Position pos{.row = rowIndex, .col = colIndex};
 			if (!isOnCycle(pos, maxCycle) && isInsideCycle(pos, grid, maxCycleSet))
 				++enclosedTiles;
 		}

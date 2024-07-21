@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <limits>
 #include <ranges>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>

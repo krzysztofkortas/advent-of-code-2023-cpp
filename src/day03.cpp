@@ -2,15 +2,18 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <concepts>
-#include <cstddef>
-#include <functional>
+#include <cstdint>
 #include <ranges>
 #include <regex>
+#include <string>
 #include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include "Utils.h"
 
 namespace
 {
@@ -67,23 +70,22 @@ Positions getSymbolPositions(std::string_view input, std::predicate<char> auto i
 bool isAdjacent(const Number& number, const Pos& symbolPos)
 {
 	const Pos& numberPos = number.pos;
-	return std::llabs(symbolPos.row - numberPos.row) <= 1 && symbolPos.col + 1 >= numberPos.col
+	return std::abs(symbolPos.row - numberPos.row) <= 1 && symbolPos.col + 1 >= numberPos.col
 		&& symbolPos.col <= numberPos.col + ssize(number.value);
 }
 
 int solvePart1(std::string_view input)
 {
 	const Numbers numbers = getNumbers(input);
-	constexpr auto isSymbol = [](unsigned char c) { return !std::isdigit(c) && c != '.'; };
+	constexpr auto isSymbol = [](unsigned char c) { return std::isdigit(c) == 0 && c != '.'; };
 	const Positions symbolPositions = getSymbolPositions(input, isSymbol);
-	return std::ranges::fold_left(
+	return Utils::sum(
 		numbers | vw::filter([&symbolPositions](const Number& number) {
 			return std::ranges::any_of(symbolPositions, [&number](const Pos& symbolPos) {
 				return isAdjacent(number, symbolPos);
 			});
-		}) | vw::transform([](const Number& number) { return std::stoi(number.value); }),
-		0,
-		std::plus<>{});
+		})
+		| vw::transform([](const Number& number) { return std::stoi(number.value); }));
 }
 
 int solvePart2(std::string_view input)
@@ -91,18 +93,17 @@ int solvePart2(std::string_view input)
 	const Numbers numbers = getNumbers(input);
 	const Positions asterisks = getSymbolPositions(input, [](char c) { return c == '*'; });
 
-	return std::ranges::fold_left(
+	return Utils::sum(
 		asterisks | vw::transform([&numbers](const Pos& asteriskPos) {
 			return numbers | vw::filter([&asteriskPos](const Number& number) {
 					   return isAdjacent(number, asteriskPos);
 				   })
 				| std::ranges::to<Numbers>();
-		}) | vw::filter([](const Numbers& adjacentNumbers) { return adjacentNumbers.size() == 2; })
-			| vw::transform([](const Numbers& adjacentNumbers) {
-				  return std::stoi(adjacentNumbers[0].value) * std::stoi(adjacentNumbers[1].value);
-			  }),
-		0,
-		std::plus<>{});
+		})
+		| vw::filter([](const Numbers& adjacentNumbers) { return adjacentNumbers.size() == 2; })
+		| vw::transform([](const Numbers& adjacentNumbers) {
+			  return std::stoi(adjacentNumbers[0].value) * std::stoi(adjacentNumbers[1].value);
+		  }));
 }
 
 TEST(day03, test)
