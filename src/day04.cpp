@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iterator>
 #include <ranges>
+#include <set>
 #include <string_view>
 #include <vector>
 
@@ -16,7 +17,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
@@ -35,6 +37,12 @@ namespace Parsing
 {
 
 namespace pegtl = tao::pegtl;
+
+struct State
+{
+	Cards cards;
+	Card tempCard;
+};
 
 struct Digits : pegtl::plus<pegtl::digit>
 {};
@@ -77,10 +85,9 @@ template<>
 struct Action<CardNumber>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Cards& cards)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!cards.empty());
-		cards.back().id = std::stoi(in.string());
+		state.tempCard.id = std::stoi(in.string());
 	}
 };
 
@@ -88,10 +95,9 @@ template<>
 struct Action<WinningNumber>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Cards& cards)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!cards.empty());
-		cards.back().winningNumbers.push_back(std::stoi(in.string()));
+		state.tempCard.winningNumbers.push_back(std::stoi(in.string()));
 	}
 };
 
@@ -99,69 +105,60 @@ template<>
 struct Action<Number>
 {
 	template<typename ActionInput>
-	static void apply(const ActionInput& in, Cards& cards)
+	static void apply(const ActionInput& in, State& state)
 	{
-		assert(!cards.empty());
-		cards.back().numbers.push_back(std::stoi(in.string()));
+		state.tempCard.numbers.push_back(std::stoi(in.string()));
 	}
 };
 
-template<typename Rule>
-struct Control : pegtl::normal<Rule>
-{};
-
 template<>
-struct Control<Line> : pegtl::normal<Line>
+struct Action<Line>
 {
-	template<typename ParseInput>
-	static void start(ParseInput&, Cards& cards)
+	static void apply0(State& state)
 	{
-		cards.emplace_back();
+		state.cards.push_back(state.tempCard);
+		state.tempCard = {};
 	}
 };
 
 Cards parse(std::string_view input)
 {
-	Cards cards;
+	State state;
 	pegtl::memory_input in{input, ""};
-	pegtl::parse<File, Action, Control>(in, cards);
-	return cards;
+	pegtl::parse<File, Action>(in, state);
+	return state.cards;
 }
 
 } // namespace Parsing
 
-template<typename ContainerT>
-	requires std::ranges::range<ContainerT>
-auto getIntersectionSize(ContainerT lhs, ContainerT rhs)
+template<rng::range RangeT>
+auto getIntersectionSize(
+	RangeT&& lhs, RangeT&& rhs) // NOLINT(cppcoreguidelines-missing-std-forward)
 {
-	std::ranges::sort(lhs);
-	std::ranges::sort(rhs);
-	ContainerT intersection;
-	std::ranges::set_intersection(lhs, rhs, std::back_inserter(intersection));
-	return std::ssize(intersection);
+	const auto s1 = lhs | rng::to<std::set>();
+	const auto s2 = rhs | rng::to<std::set>();
+	std::vector<rng::range_value_t<RangeT>> intersection;
+	rng::set_intersection(lhs, rhs, std::back_inserter(intersection));
+	return std::ranges::ssize(intersection);
 }
 
 int64_t solvePart1(std::string_view input)
 {
-	const auto cards = Parsing::parse(input);
+	const Cards cards = Parsing::parse(input);
 	return Utils::sum(cards | vw::transform([](const Card& card) {
-						  const int64_t intersectionSize =
-							  getIntersectionSize(card.winningNumbers, card.numbers);
-						  return (1 << intersectionSize) >> 1;
+						  return (1 << getIntersectionSize(card.winningNumbers, card.numbers)) >> 1;
 					  }));
 }
 
 int64_t solvePart2(std::string_view input)
 {
-	const auto cards = Parsing::parse(input);
+	const Cards cards = Parsing::parse(input);
 	std::vector<int> cardsCount(cards.size(), 1);
-	for (const auto& card : cards)
+	for (const Card& card : cards)
 	{
 		const int64_t intersectionSize = getIntersectionSize(card.winningNumbers, card.numbers);
-		for (int64_t i = card.id; i < std::min(card.id + intersectionSize, ssize(cards)); ++i)
-		{
-			cardsCount[i] += cardsCount[card.id - 1];
-		}
+		for (const auto i : vw::iota(card.id, std::min(card.id + intersectionSize, ssize(cards))))
+			cardsCount.at(i) += cardsCount.at(card.id - 1);
 	}
 
 	return Utils::sum(cardsCount);

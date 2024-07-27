@@ -18,12 +18,18 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
+
+using std::int64_t;
+using std::operator""sv;
+
+using Grid = std::vector<std::string>;
 
 struct Pos
 {
-	std::int64_t row{};
-	std::int64_t col{};
+	int64_t row{};
+	int64_t col{};
 };
 
 using Positions = std::vector<Pos>;
@@ -36,31 +42,29 @@ struct Number
 
 using Numbers = std::vector<Number>;
 
-Numbers getNumbers(std::string_view input)
+Numbers getNumbers(const Grid& grid)
 {
 	Numbers numbers;
-	const std::regex regex(R"(\d+)");
-	for (auto&& [row, line] : input | vw::split('\n') | vw::enumerate)
+	const std::regex regex{R"(\d+)"};
+	for (auto&& [row, line] : grid | vw::enumerate)
 	{
 		using Iter = std::regex_iterator<decltype(std::cbegin(line))>;
 		for (auto it = Iter{line.cbegin(), line.cend(), regex}; it != Iter{}; ++it)
-		{
-			numbers.push_back({.pos = {.row = row, .col = it->position()}, .value = it->str()});
-		}
+			numbers.emplace_back(Pos{.row = row, .col = it->position()}, it->str());
 	}
 
 	return numbers;
 }
 
-Positions getSymbolPositions(std::string_view input, std::predicate<char> auto isSymbol)
+Positions getSymbolPositions(const Grid& grid, std::predicate<char> auto isSymbol)
 {
 	Positions positions;
-	for (auto&& [row, line] : input | vw::split('\n') | vw::enumerate)
+	for (auto&& [row, line] : grid | vw::enumerate)
 	{
 		for (auto&& [col, c] : line | vw::enumerate)
 		{
 			if (isSymbol(c))
-				positions.push_back({.row = row, .col = col});
+				positions.emplace_back(row, col);
 		}
 	}
 
@@ -70,18 +74,24 @@ Positions getSymbolPositions(std::string_view input, std::predicate<char> auto i
 bool isAdjacent(const Number& number, const Pos& symbolPos)
 {
 	const Pos& numberPos = number.pos;
-	return std::abs(symbolPos.row - numberPos.row) <= 1 && symbolPos.col + 1 >= numberPos.col
+	return std::abs(symbolPos.row - numberPos.row) <= 1 && symbolPos.col >= numberPos.col - 1
 		&& symbolPos.col <= numberPos.col + ssize(number.value);
+}
+
+Grid readGrid(std::string_view input)
+{
+	return input | vw::split('\n') | rng::to<Grid>();
 }
 
 int solvePart1(std::string_view input)
 {
-	const Numbers numbers = getNumbers(input);
-	constexpr auto isSymbol = [](unsigned char c) { return std::isdigit(c) == 0 && c != '.'; };
-	const Positions symbolPositions = getSymbolPositions(input, isSymbol);
+	const Grid grid = readGrid(input);
+	constexpr auto isSymbol = [](char c) { return !"0123456789."sv.contains(c); };
+	const Positions symbolPositions = getSymbolPositions(grid, isSymbol);
+	const Numbers numbers = getNumbers(grid);
 	return Utils::sum(
 		numbers | vw::filter([&symbolPositions](const Number& number) {
-			return std::ranges::any_of(symbolPositions, [&number](const Pos& symbolPos) {
+			return rng::any_of(symbolPositions, [&number](const Pos& symbolPos) {
 				return isAdjacent(number, symbolPos);
 			});
 		})
@@ -90,15 +100,15 @@ int solvePart1(std::string_view input)
 
 int solvePart2(std::string_view input)
 {
-	const Numbers numbers = getNumbers(input);
-	const Positions asterisks = getSymbolPositions(input, [](char c) { return c == '*'; });
+	const Grid grid = readGrid(input);
+	const Positions asterisks = getSymbolPositions(grid, [](char c) { return c == '*'; });
 
 	return Utils::sum(
-		asterisks | vw::transform([&numbers](const Pos& asteriskPos) {
+		asterisks | vw::transform([numbers = getNumbers(grid)](const Pos& asteriskPos) {
 			return numbers | vw::filter([&asteriskPos](const Number& number) {
 					   return isAdjacent(number, asteriskPos);
 				   })
-				| std::ranges::to<Numbers>();
+				| rng::to<Numbers>();
 		})
 		| vw::filter([](const Numbers& adjacentNumbers) { return adjacentNumbers.size() == 2; })
 		| vw::transform([](const Numbers& adjacentNumbers) {
