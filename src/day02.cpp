@@ -184,8 +184,8 @@ int solvePart1(std::string_view input)
 {
 	const Games games = Parsing::parse(input);
 	constexpr int maxRed = 12;
-	constexpr int maxGreen = 12;
-	constexpr int maxBlue = 12;
+	constexpr int maxGreen = 13;
+	constexpr int maxBlue = 14;
 	return Utils::sum(
 		games | vw::filter([](const Game& game) {
 			const MaxCount maxCount = getMaxCount(game.sets);
