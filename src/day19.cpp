@@ -322,9 +322,9 @@ int64_t solvePart1(std::string_view input)
 	const Workflow& startWorkflow = workflows.at("in");
 	return Utils::sum(
 		ratings | vw::filter([&](const Rating& rating) {
-			return isWorkflowAccepted(startWorkflow, workflows, rating);
-		})
-		| vw::transform(vw::values) | vw::join);
+		return isWorkflowAccepted(startWorkflow, workflows, rating);
+	}) | vw::transform(vw::values)
+		| vw::join);
 }
 
 std::pair<RatingRange, RatingRange> crossCondition(
@@ -356,8 +356,8 @@ std::pair<RatingRange, RatingRange> crossCondition(
 int64_t countRatings(const RatingRange& ratings)
 {
 	return Utils::multiply(ratings | vw::values | vw::transform([](const Range& range) {
-							   return range.end - range.start;
-						   }));
+		return range.end - range.start;
+	}));
 }
 
 int64_t countAccepted(const Workflow& workflow, const Workflows& workflows, RatingRange ratings)

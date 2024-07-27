@@ -24,14 +24,14 @@ using Map = std::vector<std::string>;
 int64_t calculateLoad(const Map& map)
 {
 	return Utils::sum(map | vw::transform([](const std::string& line) {
-						  int64_t result = 0;
-						  for (const auto& [index, c] : line | vw::enumerate)
-						  {
-							  if (c == 'O')
-								  result += std::ssize(line) - index;
-						  }
-						  return result;
-					  }));
+		int64_t result = 0;
+		for (const auto& [index, c] : line | vw::enumerate)
+		{
+			if (c == 'O')
+				result += std::ssize(line) - index;
+		}
+		return result;
+	}));
 }
 
 Map moveRocks(const Map& map)
@@ -56,10 +56,9 @@ Map moveRocks(const Map& map)
 Map rotateRight(const Map& map)
 {
 	return vw::iota(0z, std::ssize(map.at(0))) | vw::transform([&](int64_t col) {
-			   return vw::iota(0z, std::ssize(map)) | vw::reverse
-				   | vw::transform([&map, col](int64_t row) { return map[row][col]; });
-		   })
-		| std::ranges::to<Map>();
+		return vw::iota(0z, std::ssize(map)) | vw::reverse
+			| vw::transform([&map, col](int64_t row) { return map[row][col]; });
+	}) | std::ranges::to<Map>();
 }
 
 Map rotateLeft(const Map& map)

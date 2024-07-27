@@ -43,9 +43,8 @@ int64_t getVerticalReflection(const Pattern& pattern, std::optional<int64_t> ign
 {
 	const auto transposed =
 		vw::iota(0z, std::ssize(pattern.at(0))) | vw::transform([&](int64_t col) {
-			return pattern | vw::transform([col](const std::string& line) { return line.at(col); });
-		})
-		| std::ranges::to<Pattern>();
+		return pattern | vw::transform([col](const std::string& line) { return line.at(col); });
+	}) | std::ranges::to<Pattern>();
 
 	for (auto i : vw::iota(1z, std::ssize(transposed)))
 	{
@@ -61,9 +60,8 @@ int64_t getVerticalReflection(const Pattern& pattern, std::optional<int64_t> ign
 int64_t solve(std::string_view input, std::invocable<Pattern> auto getReflection)
 {
 	return Utils::sum(input | vw::split("\n\n"sv) | vw::transform([&](auto&& pattern) {
-						  return getReflection(
-							  pattern | vw::split('\n') | std::ranges::to<Pattern>());
-					  }));
+		return getReflection(pattern | vw::split('\n') | std::ranges::to<Pattern>());
+	}));
 	return 1;
 }
 

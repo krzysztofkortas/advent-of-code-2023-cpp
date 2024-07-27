@@ -89,13 +89,11 @@ int solvePart1(std::string_view input)
 	constexpr auto isSymbol = [](char c) { return !"0123456789."sv.contains(c); };
 	const Positions symbolPositions = getSymbolPositions(grid, isSymbol);
 	const Numbers numbers = getNumbers(grid);
-	return Utils::sum(
-		numbers | vw::filter([&symbolPositions](const Number& number) {
-			return rng::any_of(symbolPositions, [&number](const Pos& symbolPos) {
-				return isAdjacent(number, symbolPos);
-			});
-		})
-		| vw::transform([](const Number& number) { return std::stoi(number.value); }));
+	return Utils::sum(numbers | vw::filter([&symbolPositions](const Number& number) {
+		return rng::any_of(symbolPositions, [&number](const Pos& symbolPos) {
+			return isAdjacent(number, symbolPos);
+		});
+	}) | vw::transform([](const Number& number) { return std::stoi(number.value); }));
 }
 
 int solvePart2(std::string_view input)
@@ -105,15 +103,13 @@ int solvePart2(std::string_view input)
 
 	return Utils::sum(
 		asterisks | vw::transform([numbers = getNumbers(grid)](const Pos& asteriskPos) {
-			return numbers | vw::filter([&asteriskPos](const Number& number) {
-					   return isAdjacent(number, asteriskPos);
-				   })
-				| rng::to<Numbers>();
-		})
-		| vw::filter([](const Numbers& adjacentNumbers) { return adjacentNumbers.size() == 2; })
+		return numbers | vw::filter([&asteriskPos](const Number& number) {
+			return isAdjacent(number, asteriskPos);
+		}) | rng::to<Numbers>();
+	}) | vw::filter([](const Numbers& adjacentNumbers) { return adjacentNumbers.size() == 2; })
 		| vw::transform([](const Numbers& adjacentNumbers) {
-			  return std::stoi(adjacentNumbers[0].value) * std::stoi(adjacentNumbers[1].value);
-		  }));
+		return std::stoi(adjacentNumbers[0].value) * std::stoi(adjacentNumbers[1].value);
+	}));
 }
 
 TEST(day03, test)

@@ -30,19 +30,18 @@ using Galaxies = std::vector<Galaxy>;
 std::vector<int64_t> getEmptyRows(const Grid& grid)
 {
 	return grid | vw::enumerate | vw::filter([](const auto& p) {
-			   const auto& [index, line] = p;
-			   return !line.contains('#');
-		   })
-		| vw::keys | std::ranges::to<std::vector>();
+		const auto& [index, line] = p;
+		return !line.contains('#');
+	}) | vw::keys
+		| std::ranges::to<std::vector>();
 }
 
 std::vector<int64_t> getEmptyColumns(const Grid& grid)
 {
 	return vw::iota(0z, std::ssize(grid.at(0))) | vw::filter([&](std::size_t col) {
-			   return !std::ranges::any_of(
-				   grid, [col](const std::string& line) { return line.at(col) == '#'; });
-		   })
-		| std::ranges::to<std::vector>();
+		return !std::ranges::any_of(
+			grid, [col](const std::string& line) { return line.at(col) == '#'; });
+	}) | std::ranges::to<std::vector>();
 }
 
 Galaxies getGalaxies(const Grid& grid)

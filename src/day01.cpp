@@ -18,11 +18,10 @@ namespace vw = std::views;
 constexpr int calculateTotalCalibration(std::string_view input)
 {
 	return Utils::sum(input | vw::split('\n') | vw::transform([](auto&& line) {
-						  auto digits =
-							  line | vw::filter([](char c) { return c >= '0' && c <= '9'; });
-						  assert(!digits.empty());
-						  return std::stoi(std::string{digits.front(), digits.back()});
-					  }));
+		auto digits = line | vw::filter([](char c) { return c >= '0' && c <= '9'; });
+		assert(!digits.empty());
+		return std::stoi(std::string{digits.front(), digits.back()});
+	}));
 }
 
 constexpr int calculatePart1(std::string_view input)

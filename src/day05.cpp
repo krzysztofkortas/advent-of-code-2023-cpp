@@ -160,21 +160,20 @@ int64_t solvePart1(std::string_view input)
 {
 	const auto [seeds, maps] = Parsing::parse(input);
 	return std::ranges::min(seeds | vw::transform([&](int64_t seed) {
-								for (const auto& map : maps)
-								{
-									for (const auto& item : map)
-									{
-										if (seed >= item.sourceRangeStart
-											&& seed < item.sourceRangeStart + item.rangeLength)
-										{
-											seed = item.destinationRangeStart + seed
-												- item.sourceRangeStart;
-											break;
-										}
-									}
-								}
-								return seed;
-							}));
+		for (const auto& map : maps)
+		{
+			for (const auto& item : map)
+			{
+				if (seed >= item.sourceRangeStart
+					&& seed < item.sourceRangeStart + item.rangeLength)
+				{
+					seed = item.destinationRangeStart + seed - item.sourceRangeStart;
+					break;
+				}
+			}
+		}
+		return seed;
+	}));
 }
 
 struct SeedRange
@@ -226,10 +225,9 @@ int64_t solvePart2(std::string_view input)
 {
 	const auto [seeds, maps] = Parsing::parse(input);
 	SeedRanges seedRanges = seeds | vw::chunk(2) | vw::transform([](auto&& range) {
-								assert(range.size() == 2);
-								return SeedRange{.start = range[0], .end = range[0] + range[1]};
-							})
-		| std::ranges::to<std::vector>();
+		assert(range.size() == 2);
+		return SeedRange{.start = range[0], .end = range[0] + range[1]};
+	}) | std::ranges::to<std::vector>();
 
 	for (const auto& map : maps)
 		seedRanges = convert(seedRanges, map);

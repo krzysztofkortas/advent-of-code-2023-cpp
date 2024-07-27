@@ -103,9 +103,8 @@ Races parsePart1(std::string_view input)
 	pegtl::parse<Grammar, Action>(in, state);
 
 	return vw::zip(state.times, state.distances) | vw::transform([](auto&& elem) {
-			   return Race{.time = std::get<0>(elem), .distance = std::get<1>(elem)};
-		   })
-		| std::ranges::to<std::vector>();
+		return Race{.time = std::get<0>(elem), .distance = std::get<1>(elem)};
+	}) | std::ranges::to<std::vector>();
 }
 
 Race parsePart2(std::string_view input)

@@ -146,8 +146,8 @@ int64_t solvePart1(std::string_view input)
 {
 	const Cards cards = Parsing::parse(input);
 	return Utils::sum(cards | vw::transform([](const Card& card) {
-						  return (1 << getIntersectionSize(card.winningNumbers, card.numbers)) >> 1;
-					  }));
+		return (1 << getIntersectionSize(card.winningNumbers, card.numbers)) >> 1;
+	}));
 }
 
 int64_t solvePart2(std::string_view input)

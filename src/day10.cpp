@@ -149,9 +149,9 @@ std::pair<Path, Grid> getMaxCycle(std::string_view input)
 	const Position s = getStartingPosition(grid);
 	return std::ranges::max(
 		"|-LJ7F"sv | vw::transform([&](char pipe) {
-			grid.at(s.row).at(s.col) = pipe;
-			return std::make_pair(Graph{grid}.getCycle(s), grid);
-		}),
+		grid.at(s.row).at(s.col) = pipe;
+		return std::make_pair(Graph{grid}.getCycle(s), grid);
+	}),
 		std::less{},
 		[](const auto& p) { return p.first.size(); });
 }

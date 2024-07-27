@@ -113,9 +113,9 @@ enum class HandType
 HandType getHandType(const Hand& hand)
 {
 	const auto jokers = std::ranges::count(hand.cards, 'J');
-	auto count = hand.cards | vw::filter([](char c) { return c != 'J'; })
-		| vw::transform(
-					 [&](char c) { return std::make_pair(c, std::ranges::count(hand.cards, c)); })
+	auto count = hand.cards | vw::filter([](char c) {
+		return c != 'J';
+	}) | vw::transform([&](char c) { return std::make_pair(c, std::ranges::count(hand.cards, c)); })
 		| std::ranges::to<std::map>() | vw::values | std::ranges::to<std::vector>();
 	std::ranges::sort(count, std::ranges::greater{});
 
@@ -156,18 +156,17 @@ int64_t getOverallRating(Hands hands)
 	});
 
 	return Utils::sum(hands | vw::enumerate | vw::transform([](const auto& p) {
-						  const auto& [index, hand] = p;
-						  return (index + 1) * hand.bid;
-					  }));
+		const auto& [index, hand] = p;
+		return (index + 1) * hand.bid;
+	}));
 }
 
 int64_t solvePart1(std::string_view input)
 {
 	auto hands = Parsing::parse(input) | vw::transform([](Hand& hand) {
-					 std::ranges::replace(hand.cards, 'J', 'X');
-					 return hand;
-				 })
-		| std::ranges::to<std::vector>();
+		std::ranges::replace(hand.cards, 'J', 'X');
+		return hand;
+	}) | std::ranges::to<std::vector>();
 
 	return getOverallRating(hands);
 }

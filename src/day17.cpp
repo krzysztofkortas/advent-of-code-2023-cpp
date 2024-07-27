@@ -79,11 +79,9 @@ int64_t getHeatLoss(const Grid& grid, int64_t minDistance, int64_t maxDistance)
 
 int64_t solve(std::string_view input, int64_t minDistance, int64_t maxDistance)
 {
-	const Grid grid =
-		input | vw::split('\n') | vw::transform([](auto&& line) {
-			return line | vw::transform([](char c) { return static_cast<int64_t>(c - '0'); });
-		})
-		| std::ranges::to<Grid>();
+	const Grid grid = input | vw::split('\n') | vw::transform([](auto&& line) {
+		return line | vw::transform([](char c) { return static_cast<int64_t>(c - '0'); });
+	}) | std::ranges::to<Grid>();
 
 	return getHeatLoss(grid, minDistance, maxDistance);
 }

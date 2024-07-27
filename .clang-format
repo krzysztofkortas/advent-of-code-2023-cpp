@@ -120,7 +120,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 #   AtEndOfFile: false
 #   AtStartOfBlock: false
 #   AtStartOfFile: false
-LambdaBodyIndentation: Signature
+LambdaBodyIndentation: OuterScope
 Language: Cpp
 LineEnding: DeriveLF
 MacroBlockBegin: ''

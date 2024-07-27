@@ -135,9 +135,9 @@ int64_t getEnergizedTiles(const Map& map, const Beam& startBeam)
 	Visited visited;
 	moveBeam(map, startBeam, visited);
 
-	return std::ssize(
-		visited | vw::transform([](const Beam& beam) { return beam.position; })
-		| std::ranges::to<std::set>());
+	return std::ssize(visited | vw::transform([](const Beam& beam) {
+		return beam.position;
+	}) | std::ranges::to<std::set>());
 }
 
 Map readMap(std::string_view input)
@@ -158,19 +158,17 @@ int64_t solvePart2(std::string_view input)
 	const Map map = readMap(input);
 	const int64_t maxLen = std::ssize(map);
 
-	return std::ranges::max(
-		vw::iota(0z, maxLen) | vw::transform([&](int64_t i) {
-			const auto beams = {
-				Beam{.position = {.row = i, .col = 0}, .direction = Direction::right},
-				Beam{.position = {.row = i, .col = maxLen - 1}, .direction = Direction::left},
-				Beam{.position = {.row = 0, .col = i}, .direction = Direction::bottom},
-				Beam{.position = {.row = maxLen - 1, .col = i}, .direction = Direction::top},
-			};
+	return std::ranges::max(vw::iota(0z, maxLen) | vw::transform([&](int64_t i) {
+		const auto beams = {
+			Beam{.position = {.row = i, .col = 0}, .direction = Direction::right},
+			Beam{.position = {.row = i, .col = maxLen - 1}, .direction = Direction::left},
+			Beam{.position = {.row = 0, .col = i}, .direction = Direction::bottom},
+			Beam{.position = {.row = maxLen - 1, .col = i}, .direction = Direction::top},
+		};
 
-			return std::ranges::max(beams | vw::transform([&](const Beam& beam) {
-										return getEnergizedTiles(map, beam);
-									}));
-		}));
+		return std::ranges::max(
+			beams | vw::transform([&](const Beam& beam) { return getEnergizedTiles(map, beam); }));
+	}));
 }
 
 TEST(day16, test)
