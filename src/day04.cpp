@@ -138,8 +138,8 @@ auto getIntersectionSize(
 	const auto s1 = lhs | rng::to<std::set>();
 	const auto s2 = rhs | rng::to<std::set>();
 	std::vector<rng::range_value_t<RangeT>> intersection;
-	rng::set_intersection(lhs, rhs, std::back_inserter(intersection));
-	return std::ranges::ssize(intersection);
+	rng::set_intersection(s1, s2, std::back_inserter(intersection));
+	return rng::ssize(intersection);
 }
 
 int64_t solvePart1(std::string_view input)
