@@ -13,7 +13,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
@@ -33,15 +34,14 @@ std::vector<int64_t> getEmptyRows(const Grid& grid)
 		const auto& [index, line] = p;
 		return !line.contains('#');
 	}) | vw::keys
-		| std::ranges::to<std::vector>();
+		| rng::to<std::vector>();
 }
 
 std::vector<int64_t> getEmptyColumns(const Grid& grid)
 {
-	return vw::iota(0z, std::ssize(grid.at(0))) | vw::filter([&](std::size_t col) {
-		return !std::ranges::any_of(
-			grid, [col](const std::string& line) { return line.at(col) == '#'; });
-	}) | std::ranges::to<std::vector>();
+	return vw::iota(0z, ssize(grid.at(0))) | vw::filter([&](std::size_t col) {
+		return !rng::any_of(grid, [col](const std::string& line) { return line.at(col) == '#'; });
+	}) | rng::to<std::vector>();
 }
 
 Galaxies getGalaxies(const Grid& grid)
@@ -65,33 +65,24 @@ int64_t getDistance(
 	const auto min = std::min(lhs, rhs);
 	const auto max = std::max(lhs, rhs);
 
-	auto result = max - min;
-	for (const int64_t x : empty)
-	{
-		if (x >= min && x <= max)
-			result += emptyMultiplier - 1;
-	}
-
-	return result;
+	return max - min + (emptyMultiplier - 1) * rng::count_if(empty, [&](int64_t x) {
+		return x >= min && x <= max;
+	});
 }
 
 int64_t calculate(std::string_view input, int64_t emptyMultiplier)
 {
-	const Grid grid = input | vw::split('\n') | std::ranges::to<Grid>();
+	const Grid grid = input | vw::split('\n') | rng::to<Grid>();
 
 	const auto galaxies = getGalaxies(grid);
 	const auto emptyRows = getEmptyRows(grid);
 	const auto emptyColumns = getEmptyColumns(grid);
 
 	int64_t result = 0;
-
-	for (const auto& leftGalaxy : galaxies)
+	for (const auto& [leftGalaxy, rightGalaxy] : vw::cartesian_product(galaxies, galaxies))
 	{
-		for (const auto& rightGalaxy : galaxies)
-		{
-			result += getDistance(leftGalaxy.row, rightGalaxy.row, emptyRows, emptyMultiplier);
-			result += getDistance(leftGalaxy.col, rightGalaxy.col, emptyColumns, emptyMultiplier);
-		}
+		result += getDistance(leftGalaxy.row, rightGalaxy.row, emptyRows, emptyMultiplier);
+		result += getDistance(leftGalaxy.col, rightGalaxy.col, emptyColumns, emptyMultiplier);
 	}
 
 	return result / 2;

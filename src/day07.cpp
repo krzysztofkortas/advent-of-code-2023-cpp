@@ -18,7 +18,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 using std::operator""sv;
@@ -41,7 +42,7 @@ namespace pegtl = tao::pegtl;
 struct State
 {
 	Hands hands;
-	Hand currentHand;
+	Hand tempHand;
 };
 
 struct CardsRule : pegtl::rep<numberOfCards, pegtl::alnum>
@@ -66,7 +67,7 @@ struct Action<CardsRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.currentHand.cards = in.string();
+		state.tempHand.cards = in.string();
 	}
 };
 
@@ -76,7 +77,7 @@ struct Action<BidRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.currentHand.bid = (std::stoll(in.string()));
+		state.tempHand.bid = std::stoll(in.string());
 	}
 };
 
@@ -85,7 +86,7 @@ struct Action<LineRule>
 {
 	static void apply0(State& state)
 	{
-		state.hands.push_back(state.currentHand);
+		state.hands.push_back(state.tempHand);
 	}
 };
 
@@ -110,20 +111,22 @@ enum class HandType
 	Five,
 };
 
-HandType getHandType(const Hand& hand)
+std::vector<int64_t> getCounter(const std::string& cards)
 {
-	const auto jokers = std::ranges::count(hand.cards, 'J');
-	auto count = hand.cards | vw::filter([](char c) {
-		return c != 'J';
-	}) | vw::transform([&](char c) { return std::make_pair(c, std::ranges::count(hand.cards, c)); })
-		| std::ranges::to<std::map>() | vw::values | std::ranges::to<std::vector>();
-	std::ranges::sort(count, std::ranges::greater{});
+	std::vector<int64_t> result(2);
+	const auto counter = cards | vw::filter([](char c) { return c != 'J'; })
+		| vw::transform([&](char c) { return std::pair{c, rng::count(cards, c)}; })
+		| rng::to<std::map>() | vw::values;
+	rng::partial_sort_copy(counter, result, rng::greater{});
+	return result;
+}
 
-	if (count.empty())
-		return HandType::Five;
-
-	const auto first = count.at(0) + jokers;
-	const auto second = count.at(1);
+HandType getHandType(const std::string& cards)
+{
+	const auto jokers = rng::count(cards, 'J');
+	const auto counter = getCounter(cards);
+	const auto first = counter.at(0) + jokers;
+	const auto second = counter.at(1);
 
 	if (first == 5)
 		return HandType::Five;
@@ -140,15 +143,15 @@ HandType getHandType(const Hand& hand)
 std::vector<int> getCardValues(const std::string& cards)
 {
 	constexpr auto orderedCards = "J23456789TXQKA"sv;
-	return cards | vw::transform([=](char c) { return static_cast<int>(orderedCards.find(c)); })
-		| std::ranges::to<std::vector>();
+	return cards | vw::transform([&](char c) { return static_cast<int>(orderedCards.find(c)); })
+		| rng::to<std::vector>();
 }
 
 int64_t getOverallRating(Hands hands)
 {
-	std::ranges::sort(hands, [](const Hand& lhs, const Hand& rhs) {
-		const HandType leftType = getHandType(lhs);
-		const HandType rightType = getHandType(rhs);
+	rng::sort(hands, [](const Hand& lhs, const Hand& rhs) {
+		const HandType leftType = getHandType(lhs.cards);
+		const HandType rightType = getHandType(rhs.cards);
 		if (leftType != rightType)
 			return leftType < rightType;
 
@@ -163,10 +166,10 @@ int64_t getOverallRating(Hands hands)
 
 int64_t solvePart1(std::string_view input)
 {
-	auto hands = Parsing::parse(input) | vw::transform([](Hand& hand) {
-		std::ranges::replace(hand.cards, 'J', 'X');
+	const Hands hands = Parsing::parse(input) | vw::transform([](Hand& hand) {
+		rng::replace(hand.cards, 'J', 'X');
 		return hand;
-	}) | std::ranges::to<std::vector>();
+	}) | rng::to<std::vector>();
 
 	return getOverallRating(hands);
 }

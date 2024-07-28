@@ -15,7 +15,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
@@ -102,9 +103,10 @@ Races parsePart1(std::string_view input)
 	pegtl::memory_input in{input, ""};
 	pegtl::parse<Grammar, Action>(in, state);
 
-	return vw::zip(state.times, state.distances) | vw::transform([](auto&& elem) {
-		return Race{.time = std::get<0>(elem), .distance = std::get<1>(elem)};
-	}) | std::ranges::to<std::vector>();
+	constexpr auto createRace = [](int64_t time, int64_t distance) {
+		return Race{.time = time, .distance = distance};
+	};
+	return vw::zip_transform(createRace, state.times, state.distances) | rng::to<Races>();
 }
 
 Race parsePart2(std::string_view input)
@@ -114,7 +116,7 @@ Race parsePart2(std::string_view input)
 	pegtl::parse<Grammar, Action>(in, state);
 
 	constexpr auto joinValues = vw::transform([](int64_t val) { return std::to_string(val); })
-		| vw::join | std::ranges::to<std::string>();
+		| vw::join | rng::to<std::string>();
 	return Race{
 		.time = std::stoll(state.times | joinValues),
 		.distance = std::stoll(state.distances | joinValues)};
@@ -127,17 +129,14 @@ int64_t getWinnings(const Race& race)
 	const auto delta = (race.time * race.time) - (4 * race.distance);
 	const auto left = (static_cast<double>(race.time) - std::sqrt(delta)) / 2;
 	const auto right = (static_cast<double>(race.time) + std::sqrt(delta)) / 2;
-	const auto excludeLeft = left == std::floor(left) ? 1 : 0;
-	const auto excludeRight = right == std::floor(right) ? 1 : 0;
 
-	return static_cast<int64_t>(std::floor(right)) - static_cast<int64_t>(std::ceil(left)) + 1
-		- excludeLeft - excludeRight;
+	return static_cast<int64_t>(std::ceil(right)) - static_cast<int64_t>(std::floor(left)) - 1;
 }
 
 int64_t solvePart1(std::string_view input)
 {
 	const Races races = Parsing::parsePart1(input);
-	return Utils::multiply(races | vw::transform(getWinnings));
+	return Utils::multiply(races | vw::transform(&getWinnings));
 }
 
 int64_t solvePart2(std::string_view input)

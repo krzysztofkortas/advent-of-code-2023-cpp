@@ -13,7 +13,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
@@ -43,8 +44,8 @@ namespace pegtl = tao::pegtl;
 struct State
 {
 	Almanac almanac;
-	MapItem currentMapItem;
-	Map currentMap;
+	MapItem tempMapItem;
+	Map tempMap;
 };
 
 struct NumberRule : pegtl::plus<pegtl::digit>
@@ -103,7 +104,7 @@ struct Action<DestinationRangeStartRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.currentMapItem.destinationRangeStart = std::stoll(in.string());
+		state.tempMapItem.destinationRangeStart = std::stoll(in.string());
 	}
 };
 
@@ -113,7 +114,7 @@ struct Action<SourceRangeStartRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.currentMapItem.sourceRangeStart = std::stoll(in.string());
+		state.tempMapItem.sourceRangeStart = std::stoll(in.string());
 	}
 };
 
@@ -123,7 +124,7 @@ struct Action<RangeLengthRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.currentMapItem.rangeLength = std::stoll(in.string());
+		state.tempMapItem.rangeLength = std::stoll(in.string());
 	}
 };
 
@@ -132,7 +133,7 @@ struct Action<MapItemRule>
 {
 	static void apply0(State& state)
 	{
-		state.currentMap.push_back(state.currentMapItem);
+		state.tempMap.push_back(state.tempMapItem);
 	}
 };
 
@@ -141,8 +142,8 @@ struct Action<MapRule>
 {
 	static void apply0(State& state)
 	{
-		state.almanac.maps.push_back(state.currentMap);
-		state.currentMap.clear();
+		state.almanac.maps.push_back(state.tempMap);
+		state.tempMap.clear();
 	}
 };
 
@@ -156,24 +157,26 @@ Almanac parse(std::string_view input)
 
 } // namespace Parsing
 
+int64_t getMappedSeed(const Maps& maps, int64_t seed)
+{
+	for (const Map& map : maps)
+	{
+		for (const MapItem& item : map)
+		{
+			if (seed >= item.sourceRangeStart && seed < item.sourceRangeStart + item.rangeLength)
+			{
+				seed += item.destinationRangeStart - item.sourceRangeStart;
+				break;
+			}
+		}
+	}
+	return seed;
+}
+
 int64_t solvePart1(std::string_view input)
 {
 	const auto [seeds, maps] = Parsing::parse(input);
-	return std::ranges::min(seeds | vw::transform([&](int64_t seed) {
-		for (const auto& map : maps)
-		{
-			for (const auto& item : map)
-			{
-				if (seed >= item.sourceRangeStart
-					&& seed < item.sourceRangeStart + item.rangeLength)
-				{
-					seed = item.destinationRangeStart + seed - item.sourceRangeStart;
-					break;
-				}
-			}
-		}
-		return seed;
-	}));
+	return rng::min(seeds | vw::transform([&](int64_t seed) { return getMappedSeed(maps, seed); }));
 }
 
 struct SeedRange
@@ -186,39 +189,44 @@ struct SeedRange
 
 using SeedRanges = std::vector<SeedRange>;
 
-SeedRanges convert(const SeedRanges& seedRanges, const Map& map)
+SeedRanges convertSingleRange(const SeedRange& seedRange, const Map& map)
 {
-	SeedRanges result;
+	SeedRanges convertedRanges;
+	SeedRanges originalRanges;
 
-	for (const SeedRange& seedRange : seedRanges)
+	for (const MapItem& mapItem : map)
 	{
-		SeedRanges originalRanges;
-		for (const MapItem& mapItem : map)
+		const int64_t diff = mapItem.destinationRangeStart - mapItem.sourceRangeStart;
+		const int64_t rangeStart = std::max(seedRange.start, mapItem.sourceRangeStart);
+		const int64_t rangeEnd =
+			std::min(seedRange.end, mapItem.sourceRangeStart + mapItem.rangeLength);
+		if (rangeStart < rangeEnd)
 		{
-			const int64_t diff = mapItem.destinationRangeStart - mapItem.sourceRangeStart;
-			const int64_t rangeStart = std::max(seedRange.start, mapItem.sourceRangeStart);
-			const int64_t rangeEnd =
-				std::min(seedRange.end, mapItem.sourceRangeStart + mapItem.rangeLength);
-			if (rangeStart < rangeEnd)
-			{
-				originalRanges.emplace_back(rangeStart, rangeEnd);
-				result.emplace_back(rangeStart + diff, rangeEnd + diff);
-			}
+			originalRanges.emplace_back(rangeStart, rangeEnd);
+			convertedRanges.emplace_back(rangeStart + diff, rangeEnd + diff);
 		}
-
-		std::ranges::sort(originalRanges);
-		int64_t minValue = seedRange.start;
-		for (const SeedRange& r : originalRanges)
-		{
-			if (r.start > minValue)
-				result.emplace_back(minValue, r.start);
-			minValue = r.end;
-		}
-		if (minValue != seedRange.end)
-			result.emplace_back(minValue, seedRange.end);
 	}
 
-	return result;
+	rng::sort(originalRanges);
+	int64_t currentValue = seedRange.start;
+	for (const SeedRange& r : originalRanges)
+	{
+		if (r.start > currentValue)
+			convertedRanges.emplace_back(currentValue, r.start);
+		currentValue = r.end;
+	}
+	if (currentValue != seedRange.end)
+		convertedRanges.emplace_back(currentValue, seedRange.end);
+
+	return convertedRanges;
+}
+
+SeedRanges convert(const SeedRanges& seedRanges, const Map& map)
+{
+	return seedRanges | vw::transform([&](const SeedRange& seedRange) {
+		return convertSingleRange(seedRange, map);
+	}) | vw::join
+		| rng::to<SeedRanges>();
 }
 
 int64_t solvePart2(std::string_view input)
@@ -227,12 +235,12 @@ int64_t solvePart2(std::string_view input)
 	SeedRanges seedRanges = seeds | vw::chunk(2) | vw::transform([](auto&& range) {
 		assert(range.size() == 2);
 		return SeedRange{.start = range[0], .end = range[0] + range[1]};
-	}) | std::ranges::to<std::vector>();
+	}) | rng::to<std::vector>();
 
-	for (const auto& map : maps)
+	for (const Map& map : maps)
 		seedRanges = convert(seedRanges, map);
 
-	return std::ranges::min_element(seedRanges)->start;
+	return rng::min_element(seedRanges)->start;
 }
 
 TEST(day05, test)

@@ -1,9 +1,7 @@
 #include "inputs/day10.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <iterator>
 #include <ranges>
 #include <set>
@@ -17,10 +15,10 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
-using std::size_t;
 using std::operator""sv;
 
 struct Position
@@ -38,40 +36,42 @@ struct Connection
 };
 
 using Grid = std::vector<std::string>;
-using Path = std::vector<Connection>;
+using Path = std::set<Connection>;
 
-// using Position = std::pair<int64_t, int64_t>;
-// using Connection = std::pair<Position, Position>;
+constexpr auto directions = {
+	Position{.row = -1, .col = 0},
+	{.row = 0, .col = -1},
+	{.row = 0, .col = 1},
+	{.row = 1, .col = 0}};
 
 class Graph
 {
 public:
 	explicit Graph(Grid grid)
 		: grid_{std::move(grid)}
+		, width_{ssize(grid_.at(0))}
+		, height_{ssize(grid_)}
+		, connections_{makeConnections()}
 	{
-		makeConnections();
 	}
 
 	Path getCycle(const Position& start)
 	{
 		Path cycle;
-		Position lastPos = start;
+		Position previousPos = start;
 		Position currentPos = start;
 		while (currentPos != start || cycle.empty())
 		{
 			bool anyConnected = false;
-			for (const auto& direction :
-				 {Position{.row = -1, .col = 0},
-				  {.row = 0, .col = -1},
-				  {.row = 0, .col = 1},
-				  {.row = 1, .col = 0}})
+			for (const auto& direction : directions)
 			{
 				const Position newPos{
 					.row = currentPos.row + direction.row, .col = currentPos.col + direction.col};
-				if (newPos != lastPos && connections_.contains({currentPos, newPos}))
+				const Connection connection{.begin = currentPos, .end = newPos};
+				if (newPos != previousPos && connections_.contains(connection))
 				{
-					cycle.emplace_back(currentPos, newPos);
-					lastPos = currentPos;
+					cycle.insert(connection);
+					previousPos = currentPos;
 					currentPos = newPos;
 					anyConnected = true;
 					break;
@@ -80,52 +80,56 @@ public:
 			if (!anyConnected)
 				return {};
 		}
+
 		return cycle;
 	}
 
 private:
-	void makeConnections()
+	[[nodiscard]] std::set<Connection> makeConnections() const
 	{
-		for (const auto& [rowIndex, row] : grid_ | vw::enumerate)
+		std::set<Connection> connections;
+		for (const auto [rowIndex, colIndex] :
+			 vw::cartesian_product(vw::iota(0z, height_), vw::iota(0z, width_)))
 		{
-			for (const auto& [colIndex, _] : row | vw::enumerate)
-			{
-				const Position pos{.row = rowIndex, .col = colIndex};
-				makeVerticalConnections(pos);
-				makeHorizontalConnections(pos);
-			}
+			const Position pos{.row = rowIndex, .col = colIndex};
+			makeVerticalConnections(connections, pos);
+			makeHorizontalConnections(connections, pos);
 		}
+
+		return connections;
 	}
 
-	void makeVerticalConnections(const Position& pos)
+	void makeVerticalConnections(std::set<Connection>& connections, const Position& pos) const
 	{
 		const Position bottomPos{.row = pos.row + 1, .col = pos.col};
-		if (bottomPos.row >= std::ssize(grid_))
+		if (bottomPos.row >= height_)
 			return;
 		const char topTile = grid_.at(pos.row).at(pos.col);
 		const char bottomTile = grid_.at(bottomPos.row).at(bottomPos.col);
 		if ("|7F"sv.contains(topTile) && "|LJ"sv.contains(bottomTile))
 		{
-			connections_.emplace(pos, bottomPos);
-			connections_.emplace(bottomPos, pos);
+			connections.emplace(pos, bottomPos);
+			connections.emplace(bottomPos, pos);
 		}
 	}
 
-	void makeHorizontalConnections(const Position& pos)
+	void makeHorizontalConnections(std::set<Connection>& connections, const Position& pos) const
 	{
 		const Position rightPos{.row = pos.row, .col = pos.col + 1};
-		if (rightPos.col >= std::ssize(grid_.at(0)))
+		if (rightPos.col >= width_)
 			return;
 		const char leftTile = grid_.at(pos.row).at(pos.col);
 		const char rightTile = grid_.at(rightPos.row).at(rightPos.col);
 		if ("-LF"sv.contains(leftTile) && "-J7"sv.contains(rightTile))
 		{
-			connections_.emplace(pos, rightPos);
-			connections_.emplace(rightPos, pos);
+			connections.emplace(pos, rightPos);
+			connections.emplace(rightPos, pos);
 		}
 	}
 
 	Grid grid_;
+	int64_t width_;
+	int64_t height_;
 	std::set<Connection> connections_;
 };
 
@@ -133,77 +137,64 @@ Position getStartingPosition(const Grid& grid)
 {
 	for (const auto& [rowIndex, row] : grid | vw::enumerate)
 	{
-		for (const auto& [colIndex, c] : row | vw::enumerate)
-		{
-			if (c == 'S')
-				return {.row = rowIndex, .col = colIndex};
-		}
+		if (auto pos = row.find('S'); pos != std::string::npos)
+			return {.row = rowIndex, .col = static_cast<int64_t>(pos)};
 	}
 
 	std::unreachable();
 }
 
-std::pair<Path, Grid> getMaxCycle(std::string_view input)
+Grid getGrid(std::string_view input)
 {
-	Grid grid = input | vw::split('\n') | std::ranges::to<Grid>();
+	return input | vw::split('\n') | rng::to<Grid>();
+}
+
+Path getMaxCycle(Grid grid)
+{
 	const Position s = getStartingPosition(grid);
-	return std::ranges::max(
+	return rng::max(
 		"|-LJ7F"sv | vw::transform([&](char pipe) {
 		grid.at(s.row).at(s.col) = pipe;
-		return std::make_pair(Graph{grid}.getCycle(s), grid);
+		return Graph{grid}.getCycle(s);
 	}),
-		std::less{},
-		[](const auto& p) { return p.first.size(); });
+		{},
+		&Path::size);
 }
 
 int64_t solvePart1(std::string_view input)
 {
-	return (ssize(getMaxCycle(input).first) + 1) / 2;
+	return (ssize(getMaxCycle(getGrid(input))) + 1) / 2;
 }
 
-bool isInsideCycle(const Position& pos, const Grid& grid, const std::set<Connection>& cycle)
+bool isInsideCycle(const Position& pos, const std::set<Connection>& cycle, int64_t gridWidth)
 {
-	if (pos.row == 0 || pos.row + 1 == std::ssize(grid))
-		return false;
-
-	int64_t intersections = 0;
-
-	for (const int64_t y : vw::iota(pos.col + 1, std::ssize(grid[0])))
-	{
-		const Connection con = {
-			.begin = {.row = pos.row, .col = y}, .end = {.row = pos.row - 1, .col = y}};
-		const Connection conRev = {.begin = con.end, .end = con.begin};
-
-		if (cycle.contains(con) || cycle.contains(conRev))
-			++intersections;
-	}
+	const auto intersections = rng::count_if(vw::iota(pos.col + 1, gridWidth), [&](int64_t col) {
+		const Connection conn{
+			.begin = Position{.row = pos.row, .col = col},
+			.end = Position{.row = pos.row - 1, .col = col}};
+		const Connection connRev{.begin = conn.end, .end = conn.begin};
+		return cycle.contains(conn) || cycle.contains(connRev);
+	});
 
 	return intersections % 2 == 1;
 }
 
-bool isOnCycle(const Position& pos, const Path& cycle)
-{
-	return std::ranges::any_of(
-		cycle, [&](const Connection& c) { return c.begin == pos || c.end == pos; });
-}
-
 int64_t solvePart2(std::string_view input)
 {
-	const auto [maxCycle, grid] = getMaxCycle(input);
-	const std::set<Connection> maxCycleSet(maxCycle.cbegin(), maxCycle.cend());
-	int64_t enclosedTiles = 0;
+	const Grid grid = getGrid(input);
+	const int64_t gridWidth = ssize(grid.at(0));
+	const int64_t gridHeight = ssize(grid);
+	const Path maxCycle = getMaxCycle(grid);
+	const std::set<Connection> cycleConnections(maxCycle.cbegin(), maxCycle.cend());
+	const std::set<Position> cyclePositions =
+		maxCycle | vw::transform(&Connection::begin) | rng::to<std::set>();
 
-	for (const auto& [rowIndex, row] : grid | vw::enumerate)
-	{
-		for (const auto& [colIndex, _] : row | vw::enumerate)
-		{
-			const Position pos{.row = rowIndex, .col = colIndex};
-			if (!isOnCycle(pos, maxCycle) && isInsideCycle(pos, grid, maxCycleSet))
-				++enclosedTiles;
-		}
-	}
-
-	return enclosedTiles;
+	return rng::count_if(
+		vw::cartesian_product(vw::iota(0, gridHeight), vw::iota(0, gridWidth)), [&](const auto& p) {
+		const auto& [rowIndex, colIndex] = p;
+		const Position pos{.row = rowIndex, .col = colIndex};
+		return !cyclePositions.contains(pos) && isInsideCycle(pos, cycleConnections, gridWidth);
+	});
 }
 
 TEST(day10, test)
