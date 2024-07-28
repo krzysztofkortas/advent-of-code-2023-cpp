@@ -65,9 +65,9 @@ int64_t getDistance(
 	const auto min = std::min(lhs, rhs);
 	const auto max = std::max(lhs, rhs);
 
-	return max - min + (emptyMultiplier - 1) * rng::count_if(empty, [&](int64_t x) {
+	return max - min + ((emptyMultiplier - 1) * rng::count_if(empty, [&](int64_t x) {
 		return x >= min && x <= max;
-	});
+	}));
 }
 
 int64_t calculate(std::string_view input, int64_t emptyMultiplier)
