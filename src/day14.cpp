@@ -15,90 +15,83 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
-using Map = std::vector<std::string>;
+using Grid = std::vector<std::string>;
 
-int64_t calculateLoad(const Map& map)
+int64_t calculateLoad(const Grid& grid)
 {
-	return Utils::sum(map | vw::transform([](const std::string& line) {
-		int64_t result = 0;
-		for (const auto& [index, c] : line | vw::enumerate)
-		{
-			if (c == 'O')
-				result += std::ssize(line) - index;
-		}
-		return result;
-	}));
+	return Utils::sum(grid | vw::transform([](const std::string& line) {
+		return line | vw::enumerate
+			| vw::filter([](const auto& p) { return std::get<1>(p) == 'O'; })
+			| vw::transform([&line](const auto& p) { return ssize(line) - std::get<0>(p); });
+	}) | vw::join);
 }
 
-Map moveRocks(const Map& map)
+Grid moveRocks(const Grid& grid)
 {
-	Map result;
-	for (const std::string& line : map)
-	{
+	return grid | vw::transform([](const std::string& line) {
 		std::string resultLine = line;
-		int64_t lastIndex = 0;
-		for (const auto& [index, c] : line | vw::enumerate)
+		for (int64_t freeSlot = 0; const auto& [index, c] : line | vw::enumerate)
 		{
 			if (c == 'O')
-				std::swap(resultLine[lastIndex++], resultLine[index]);
+				std::swap(resultLine[freeSlot++], resultLine[index]);
 			else if (c == '#')
-				lastIndex = index + 1;
+				freeSlot = index + 1;
 		}
-		result.push_back(resultLine);
-	}
-	return result;
+		return resultLine;
+	}) | rng::to<Grid>();
 }
 
-Map rotateRight(const Map& map)
+Grid rotateRight(const Grid& grid)
 {
-	return vw::iota(0z, std::ssize(map.at(0))) | vw::transform([&](int64_t col) {
-		return vw::iota(0z, std::ssize(map)) | vw::reverse
-			| vw::transform([&map, col](int64_t row) { return map[row][col]; });
-	}) | std::ranges::to<Map>();
+	return vw::iota(0z, ssize(grid.at(0))) | vw::transform([&grid](int64_t col) {
+		return vw::iota(0z, ssize(grid)) | vw::reverse
+			| vw::transform([&grid, col](int64_t row) { return grid[row][col]; });
+	}) | rng::to<Grid>();
 }
 
-Map rotateLeft(const Map& map)
+Grid rotateLeft(const Grid& grid)
 {
-	return rotateRight(rotateRight(rotateRight(map)));
+	return rotateRight(rotateRight(rotateRight(grid)));
 }
 
-Map readMap(std::string_view input)
+Grid readGrid(std::string_view input)
 {
-	return input | vw::split('\n') | std::ranges::to<Map>();
+	return input | vw::split('\n') | rng::to<Grid>();
 }
 
 int64_t solvePart1(std::string_view input)
 {
-	Map map = readMap(input);
-	map = moveRocks(rotateLeft(map));
-	return calculateLoad(map);
+	Grid grid = readGrid(input);
+	grid = moveRocks(rotateLeft(grid));
+	return calculateLoad(grid);
 }
 
-Map makeStep(Map map)
+Grid makeStep(Grid grid)
 {
-	map = moveRocks(rotateLeft(map));
-	map = moveRocks(rotateRight(map));
-	map = moveRocks(rotateRight(map));
-	map = moveRocks(rotateRight(map));
-	map = rotateRight(rotateRight(map));
+	grid = moveRocks(rotateLeft(grid));
+	grid = moveRocks(rotateRight(grid));
+	grid = moveRocks(rotateRight(grid));
+	grid = moveRocks(rotateRight(grid));
+	grid = rotateRight(rotateRight(grid));
 
-	return map;
+	return grid;
 }
 
 int64_t solvePart2(std::string_view input)
 {
-	Map map = readMap(input);
-	std::map<Map, int64_t> visited;
+	Grid grid = readGrid(input);
+	std::map<Grid, int64_t> visited;
 	std::vector<int64_t> results;
-	const int64_t numberOfSteps = 1000000000;
+	constexpr int64_t numberOfSteps = 1000000000;
 
-	for (int64_t i : vw::iota(0, numberOfSteps + 1))
+	for (const int64_t i : vw::iota(0, numberOfSteps + 1))
 	{
-		if (auto it = visited.find(map); it != visited.end())
+		if (const auto it = visited.find(grid); it != visited.end())
 		{
 			const int64_t cycleLen = i - it->second;
 			const int64_t resIndex = it->second + ((numberOfSteps - i) % cycleLen);
@@ -106,13 +99,13 @@ int64_t solvePart2(std::string_view input)
 		}
 		else
 		{
-			visited.emplace(map, i);
-			results.push_back(calculateLoad(rotateLeft(map)));
-			map = makeStep(map);
+			visited.emplace(grid, i);
+			results.push_back(calculateLoad(rotateLeft(grid)));
+			grid = makeStep(grid);
 		}
 	}
 
-	return calculateLoad(map);
+	return results.back();
 }
 
 TEST(day14, test)

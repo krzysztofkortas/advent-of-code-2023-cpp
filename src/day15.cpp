@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <optional>
 #include <ranges>
@@ -12,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include <bits/ranges_algo.h>
 #include <gtest/gtest.h>
 
 #include "Utils.h"
@@ -19,19 +21,20 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
 constexpr int multiplier = 17;
 constexpr int modulo = 256;
 
-constexpr auto getHash = [](std::ranges::input_range auto&& range) {
-	int64_t result = 0;
-	for (auto c : range)
-		result = (multiplier * (result + c)) % modulo;
+template<typename R, typename V>
+concept RangeOf = rng::range<R> && std::same_as<rng::range_value_t<R>, V>;
 
-	return result % modulo;
+constexpr auto getHash = [](RangeOf<char> auto&& range) {
+	return rng::fold_left(
+		range, 0, [](int64_t result, char c) { return (multiplier * (result + c)) % modulo; });
 };
 
 int64_t solvePart1(std::string_view input)
@@ -61,7 +64,7 @@ Operation makeOperation(char c)
 struct Step
 {
 	std::string label;
-	Operation operation;
+	Operation operation{};
 	std::optional<int64_t> focalLength;
 };
 
@@ -71,8 +74,7 @@ using HashMap = std::array<Steps, modulo>;
 Step makeStep(const std::string& step)
 {
 	static const std::regex regex(R"((\w+)([-=])(\w*))");
-	std::smatch match;
-	if (std::regex_match(step, match, regex))
+	if (std::smatch match; std::regex_match(step, match, regex))
 	{
 		return Step{
 			.label = match.str(1),
@@ -92,7 +94,7 @@ HashMap getHashMap(const Steps& steps)
 		auto& vec = hashMap.at(getHash(step.label));
 		const Operation op = step.operation;
 
-		auto it = std::ranges::find(vec, step.label, &Step::label);
+		auto it = rng::find(vec, step.label, &Step::label);
 		if (op == Operation::dash)
 		{
 			if (it != vec.end())
@@ -113,12 +115,12 @@ HashMap getHashMap(const Steps& steps)
 int64_t solvePart2(std::string_view input)
 {
 	const Steps steps = input | vw::split(',')
-		| vw::transform([](auto&& step) { return makeStep(step | std::ranges::to<std::string>()); })
-		| std::ranges::to<Steps>();
-	const HashMap haspMap = getHashMap(steps);
+		| vw::transform([](auto&& step) { return makeStep(step | rng::to<std::string>()); })
+		| rng::to<Steps>();
+	const HashMap hashMap = getHashMap(steps);
 
 	int64_t result = 0;
-	for (const auto& [boxNumber, vec] : haspMap | vw::enumerate)
+	for (const auto& [boxNumber, vec] : hashMap | vw::enumerate)
 	{
 		for (const auto& [index, step] : vec | vw::enumerate)
 		{
