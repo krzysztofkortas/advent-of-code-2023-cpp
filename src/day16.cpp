@@ -16,11 +16,12 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
-using Map = std::vector<std::string>;
+using Grid = std::vector<std::string>;
 
 enum class Direction
 {
@@ -46,8 +47,6 @@ struct Beam
 	friend auto operator<=>(const Beam&, const Beam&) = default;
 };
 
-using Visited = std::set<Beam>;
-
 Position getPosDiff(Direction direction)
 {
 	static const std::unordered_map<Direction, Position> diff{
@@ -57,19 +56,6 @@ Position getPosDiff(Direction direction)
 		{Direction::right, {.row = 0, .col = 1}}};
 
 	return diff.at(direction);
-}
-
-std::optional<Beam> getNewBeam(const Beam& beam, Direction direction, int64_t maxSize)
-{
-	const auto diff = getPosDiff(direction);
-	const Position position{
-		.row = beam.position.row + diff.row, .col = beam.position.col + diff.col};
-	if (std::min(position.row, position.col) < 0 || std::max(position.row, position.col) >= maxSize)
-	{
-		return std::nullopt;
-	}
-
-	return Beam{.position = position, .direction = direction};
 }
 
 Direction getNewDirection(Direction dir, char c)
@@ -85,80 +71,100 @@ Direction getNewDirection(Direction dir, char c)
 	return c == '/' ? newDir.first : newDir.second;
 }
 
-void moveBeam(const Map& map, const std::optional<Beam>& beam, Visited& visited)
+class EnergizedTilesCounter
 {
-	if (!beam || visited.contains(*beam))
-		return;
-
-	const int64_t mapLen = std::ssize(map);
-
-	visited.insert(*beam);
-	const auto c = map.at(beam->position.row).at(beam->position.col);
-	if (c == '.')
+public:
+	explicit EnergizedTilesCounter(Grid grid)
+		: grid_{std::move(grid)}
+		, gridSize_{ssize(grid_)}
 	{
-		const auto newBeam = getNewBeam(*beam, beam->direction, mapLen);
-		moveBeam(map, newBeam, visited);
 	}
-	else if (c == '/' || c == '\\')
+
+	int64_t countEnergizedTiles(const Beam& startBeam)
 	{
-		const Direction dir = getNewDirection(beam->direction, c);
-		const auto newBeam = getNewBeam(*beam, dir, mapLen);
-		moveBeam(map, newBeam, visited);
+		visited_.clear();
+		moveBeam(startBeam);
+
+		return ssize(visited_ | vw::transform(&Beam::position) | rng::to<std::set>());
 	}
-	else
+
+private:
+	[[nodiscard]] bool isValid(const Position& pos) const
 	{
-		auto visitSplitter = [&](Direction dir1, Direction dir2) {
-			if (beam->direction == dir1 || beam->direction == dir2)
-			{
-				const auto newBeam = getNewBeam(*beam, beam->direction, mapLen);
-				moveBeam(map, newBeam, visited);
-			}
-			else
-			{
-				const auto newBeam1 = getNewBeam(*beam, dir1, mapLen);
-				const auto newBeam2 = getNewBeam(*beam, dir2, mapLen);
-				moveBeam(map, newBeam1, visited);
-				moveBeam(map, newBeam2, visited);
-			}
-		};
-		if (c == '|')
-			visitSplitter(Direction::top, Direction::bottom);
-		else if (c == '-')
+		return pos.row >= 0 && pos.row < gridSize_ && pos.col >= 0 && pos.col < gridSize_;
+	}
+
+	[[nodiscard]] std::optional<Beam> getNewBeam(const Beam& beam, Direction direction) const
+	{
+		const Position diff = getPosDiff(direction);
+		const Position pos{
+			.row = beam.position.row + diff.row, .col = beam.position.col + diff.col};
+		if (!isValid(pos))
+			return {};
+
+		return Beam{.position = pos, .direction = direction};
+	}
+
+	void split(const Beam& beam, Direction dir1, Direction dir2)
+	{
+		if (beam.direction == dir1 || beam.direction == dir2)
 		{
-			visitSplitter(Direction::left, Direction::right);
+			moveBeam(getNewBeam(beam, beam.direction));
+		}
+		else
+		{
+			moveBeam(getNewBeam(beam, dir1));
+			moveBeam(getNewBeam(beam, dir2));
 		}
 	}
+
+	void moveBeam(const std::optional<Beam>& beam)
+	{
+		if (!beam || visited_.contains(*beam))
+			return;
+
+		visited_.insert(*beam);
+		const auto c = grid_.at(beam->position.row).at(beam->position.col);
+
+		if (c == '.')
+			moveBeam(getNewBeam(*beam, beam->direction));
+		else if (c == '/' || c == '\\')
+			moveBeam(getNewBeam(*beam, getNewDirection(beam->direction, c)));
+		else if (c == '|')
+			split(*beam, Direction::top, Direction::bottom);
+		else if (c == '-')
+			split(*beam, Direction::left, Direction::right);
+	}
+
+	Grid grid_;
+	int64_t gridSize_;
+	std::set<Beam> visited_;
+};
+
+int64_t countEnergizedTiles(const Grid& grid, const Beam& startBeam)
+{
+	return EnergizedTilesCounter{grid}.countEnergizedTiles(startBeam);
 }
 
-int64_t getEnergizedTiles(const Map& map, const Beam& startBeam)
+Grid readGrid(std::string_view input)
 {
-	Visited visited;
-	moveBeam(map, startBeam, visited);
-
-	return std::ssize(visited | vw::transform([](const Beam& beam) {
-		return beam.position;
-	}) | std::ranges::to<std::set>());
-}
-
-Map readMap(std::string_view input)
-{
-	return input | vw::split('\n') | std::ranges::to<Map>();
+	return input | vw::split('\n') | rng::to<Grid>();
 }
 
 int64_t solvePart1(std::string_view input)
 {
-	const Map map = readMap(input);
+	const Grid grid = readGrid(input);
 
-	return getEnergizedTiles(
-		map, Beam{.position = {.row = 0, .col = 0}, .direction = Direction::right});
+	return countEnergizedTiles(
+		grid, Beam{.position = {.row = 0, .col = 0}, .direction = Direction::right});
 }
 
 int64_t solvePart2(std::string_view input)
 {
-	const Map map = readMap(input);
-	const int64_t maxLen = std::ssize(map);
+	const Grid grid = readGrid(input);
+	const int64_t maxLen = ssize(grid);
 
-	return std::ranges::max(vw::iota(0z, maxLen) | vw::transform([&](int64_t i) {
+	return rng::max(vw::iota(0z, maxLen) | vw::transform([&grid, maxLen](int64_t i) {
 		const auto beams = {
 			Beam{.position = {.row = i, .col = 0}, .direction = Direction::right},
 			Beam{.position = {.row = i, .col = maxLen - 1}, .direction = Direction::left},
@@ -166,8 +172,9 @@ int64_t solvePart2(std::string_view input)
 			Beam{.position = {.row = maxLen - 1, .col = i}, .direction = Direction::top},
 		};
 
-		return std::ranges::max(
-			beams | vw::transform([&](const Beam& beam) { return getEnergizedTiles(map, beam); }));
+		return rng::max(beams | vw::transform([&grid](const Beam& beam) {
+			return countEnergizedTiles(grid, beam);
+		}));
 	}));
 }
 
