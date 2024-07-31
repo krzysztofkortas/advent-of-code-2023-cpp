@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <ranges>
+#include <regex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -12,15 +13,19 @@
 
 #include <gtest/gtest.h>
 
+#include "Utils.h"
+
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
 using Direction = std::pair<int64_t, int64_t>;
 using Position = std::pair<int64_t, int64_t>;
+using Positions = std::vector<Position>;
 
 Direction getDir(char c)
 {
@@ -38,56 +43,80 @@ Direction getDir(char c)
 	return directions.at(c);
 }
 
-int64_t solvePart1(std::string_view input)
+struct Instruction
+{
+	Direction direction;
+	int64_t meters{};
+};
+
+using Instructions = std::vector<Instruction>;
+
+int64_t shoelaceFormula(const Positions& positions)
+{
+	return std::abs(
+		Utils::sum(positions | vw::pairwise_transform([](const Position& p1, const Position& p2) {
+		return (p1.first * p2.second) - (p1.second * p2.first);
+	})) / 2);
+}
+
+int64_t perimeter(const Instructions& instructions)
+{
+	return Utils::sum(instructions | vw::transform(&Instruction::meters));
+}
+
+int64_t integerPointsFromPickTheorem(int64_t area, int64_t perimeter)
+{
+	return area + (perimeter / 2) + 1;
+}
+
+Positions getPositions(const Instructions& instructions)
 {
 	Position previousPoint{0, 0};
-	int64_t circuit = 1;
-	int64_t area = 0;
-
-	for (auto&& line : input | vw::split('\n'))
+	Positions positions{previousPoint};
+	for (const auto& [dir, meters] : instructions)
 	{
-		const auto v = line | vw::split(' ') | std::ranges::to<std::vector<std::string>>();
-		assert(v.size() == 3);
-		const Direction dir = getDir(v[0].front());
-		const int64_t meters = std::stoll(v[1]);
-		circuit += meters;
 		const Position currentPoint{
 			previousPoint.first + (meters * dir.first),
 			previousPoint.second + (meters * dir.second)};
-		area +=
-			previousPoint.first * currentPoint.second - previousPoint.second * currentPoint.first;
-
+		positions.push_back(currentPoint);
 		previousPoint = currentPoint;
 	}
 
-	return (std::abs(area) + circuit + 2) / 2;
+	return positions;
+}
+
+int64_t solve(const Instructions& instructions)
+{
+	return integerPointsFromPickTheorem(
+		shoelaceFormula(getPositions(instructions)), perimeter(instructions));
+}
+
+int64_t solvePart1(std::string_view input)
+{
+	const Instructions instructions = input | vw::split('\n') | vw::transform([](auto&& line) {
+		const auto v = line | vw::split(' ') | rng::to<std::vector<std::string>>();
+		assert(v.size() == 3);
+		return Instruction{.direction = getDir(v[0].at(0)), .meters = std::stoll(v[1])};
+	}) | rng::to<Instructions>();
+
+	return solve(instructions);
 }
 
 int64_t solvePart2(std::string_view input)
 {
-	Position previousPoint{0, 0};
-	int64_t circuit = 1;
-	int64_t area = 0;
+	const Instructions instructions = input | vw::split('\n')
+		| vw::transform(rng::to<std::string>()) | vw::transform([](const std::string& line) {
+		static const std::regex regex(R"(\w \d+ \(#(\w{5})(\d)\))");
+		if (std::smatch match; std::regex_match(line, match, regex))
+		{
+			const Direction dir = getDir(match.str(2).at(0));
+			const int64_t meters = std::stoll(match.str(1), nullptr, 16);
+			return Instruction{.direction = dir, .meters = meters};
+		}
+		std::unreachable();
+	}) | rng::to<Instructions>();
 
-	for (auto&& line : input | vw::split('\n'))
-	{
-		const std::string code =
-			(line | vw::split(' ') | std::ranges::to<std::vector<std::string>>()).at(2);
-
-		const Direction dir = getDir(code.at(std::ssize(code) - 2));
-		const std::string encodedMeters = code.substr(2, std::ssize(code) - 4);
-		const int64_t meters = std::stoll(encodedMeters, nullptr, 16);
-		circuit += meters;
-		const Position currentPoint{
-			previousPoint.first + (meters * dir.first),
-			previousPoint.second + (meters * dir.second)};
-		area +=
-			previousPoint.first * currentPoint.second - previousPoint.second * currentPoint.first;
-
-		previousPoint = currentPoint;
-	}
-
-	return (std::abs(area) + circuit + 2) / 2;
+	return solve(instructions);
 }
 
 TEST(day18, test)
