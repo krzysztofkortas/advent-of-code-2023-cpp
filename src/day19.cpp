@@ -17,7 +17,8 @@
 namespace
 {
 
-namespace vw = std::ranges::views;
+namespace rng = std::ranges;
+namespace vw = std::views;
 
 using std::int64_t;
 
@@ -51,15 +52,7 @@ struct Rule
 };
 
 using Rules = std::vector<Rule>;
-
-struct Workflow;
-using Workflows = std::unordered_map<std::string, Workflow>;
-
-struct Workflow
-{
-	std::string name;
-	Rules rules;
-};
+using Workflows = std::unordered_map<std::string, Rules>;
 
 namespace Parsing
 {
@@ -70,8 +63,9 @@ struct State
 {
 	Workflows workflows;
 	Ratings ratings;
-	Workflow tempWorkflow;
+	std::string tempWorkflowName;
 	Rule tempRule;
+	Rules tempRules;
 	Condition tempCondition;
 	char tempRatingCategory{};
 	int64_t tempRatingValue{};
@@ -151,7 +145,7 @@ struct Action<WorkflowNameRule>
 	template<typename ActionInput>
 	static void apply(const ActionInput& in, State& state)
 	{
-		state.tempWorkflow.name = in.string();
+		state.tempWorkflowName = in.string();
 	}
 };
 
@@ -222,7 +216,7 @@ struct Action<RuleRule>
 {
 	static void apply0(State& state)
 	{
-		state.tempWorkflow.rules.push_back(state.tempRule);
+		state.tempRules.push_back(state.tempRule);
 		state.tempRule.condition = std::nullopt;
 	}
 };
@@ -232,8 +226,8 @@ struct Action<WorkflowRule>
 {
 	static void apply0(State& state)
 	{
-		state.workflows.emplace(state.tempWorkflow.name, state.tempWorkflow);
-		state.tempWorkflow.rules.clear();
+		state.workflows.emplace(state.tempWorkflowName, state.tempRules);
+		state.tempRules.clear();
 	}
 };
 
@@ -298,9 +292,9 @@ bool isConditionTrue(const Condition& condition, const Rating& rating)
 	std::unreachable();
 }
 
-bool isWorkflowAccepted(const Workflow& workflow, const Workflows& workflows, const Rating& rating)
+bool isWorkflowAccepted(const Rules& rules, const Workflows& workflows, const Rating& rating)
 {
-	for (const Rule& rule : workflow.rules)
+	for (const Rule& rule : rules)
 	{
 		if (!rule.condition || isConditionTrue(*rule.condition, rating))
 		{
@@ -313,13 +307,14 @@ bool isWorkflowAccepted(const Workflow& workflow, const Workflows& workflows, co
 				return isWorkflowAccepted(workflows.at(consequent), workflows, rating);
 		}
 	}
+
 	return true;
 }
 
 int64_t solvePart1(std::string_view input)
 {
 	const auto [workflows, ratings] = Parsing::parse(input);
-	const Workflow& startWorkflow = workflows.at("in");
+	const Rules& startWorkflow = workflows.at("in");
 	return Utils::sum(
 		ratings | vw::filter([&](const Rating& rating) {
 		return isWorkflowAccepted(startWorkflow, workflows, rating);
@@ -331,20 +326,21 @@ std::pair<RatingRange, RatingRange> crossCondition(
 	const Condition& condition, const RatingRange& ratings)
 {
 	const auto [range1, range2] = [&]() -> std::pair<Range, Range> {
-		const auto range = ratings.at(condition.category);
+		const auto& [start, end] = ratings.at(condition.category);
 		switch (condition.op)
 		{
 			case Operator::less:
 				return {
-					Range{.start = range.start, .end = condition.value},
-					Range{.start = condition.value, .end = range.end}};
+					Range{.start = start, .end = condition.value},
+					Range{.start = condition.value, .end = end}};
 			case Operator::greater:
 				return {
-					Range{.start = condition.value + 1, .end = range.end},
-					Range{.start = range.start, .end = condition.value + 1}};
+					Range{.start = condition.value + 1, .end = end},
+					Range{.start = start, .end = condition.value + 1}};
 		}
 		std::unreachable();
 	}();
+
 	auto ratings1 = ratings;
 	auto ratings2 = ratings;
 	ratings1[condition.category] = range1;
@@ -360,40 +356,33 @@ int64_t countRatings(const RatingRange& ratings)
 	}));
 }
 
-int64_t countAccepted(const Workflow& workflow, const Workflows& workflows, RatingRange ratings)
+int64_t countAccepted(const Rules& rules, const Workflows& workflows, RatingRange ratings)
 {
-	int64_t result = 0;
-	for (const Rule& rule : workflow.rules)
-	{
-		auto count = [&](const RatingRange& ratingsToCount) {
-			const std::string& consequent = rule.consequent;
-			if (consequent == "A")
-				return countRatings(ratingsToCount);
-			else if (consequent == "R")
-				return 0z;
-			else
-				return countAccepted(workflows.at(consequent), workflows, ratingsToCount);
-		};
-		if (!rule.condition)
-		{
-			result += count(ratings);
-		}
+	auto count = [&workflows](const std::string& consequent, const RatingRange& ratingsToCount) {
+		if (consequent == "A")
+			return countRatings(ratingsToCount);
+		else if (consequent == "R")
+			return 0z;
 		else
-		{
-			const auto [ratings1, ratings2] = crossCondition(*rule.condition, ratings);
-			result += count(ratings1);
-			ratings = ratings2;
-		}
-	}
-	return result;
+			return countAccepted(workflows.at(consequent), workflows, ratingsToCount);
+	};
+
+	return Utils::sum(rules | vw::transform([&](const Rule& rule) {
+		if (!rule.condition)
+			return count(rule.consequent, ratings);
+
+		const auto [ratings1, ratings2] = crossCondition(*rule.condition, ratings);
+		ratings = ratings2;
+		return count(rule.consequent, ratings1);
+	}));
 }
 
 int64_t solvePart2(std::string_view input)
 {
 	const auto [workflows, _] = Parsing::parse(input);
 	const Range range{.start = 1, .end = 4001};
-	const RatingRange ratings =
-		vw::zip("xmas", vw::repeat(range, 4)) | std::ranges::to<RatingRange>();
+	const RatingRange ratings = vw::zip("xmas", vw::repeat(range, 4)) | rng::to<RatingRange>();
+
 	return countAccepted(workflows.at("in"), workflows, ratings);
 }
 
