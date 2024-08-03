@@ -27,7 +27,7 @@ using Key = std::pair<Position, Direction>;
 
 bool isValid(const Position& pos, int64_t width, int64_t height)
 {
-	return pos.first > 0 && pos.first <= height && pos.second > 0 && pos.second <= width;
+	return pos.first >= 0 && pos.first < height && pos.second >= 0 && pos.second < width;
 }
 
 int64_t getHeatLoss(const Grid& grid, int64_t minDistance, int64_t maxDistance)
@@ -67,7 +67,7 @@ int64_t getHeatLoss(const Grid& grid, int64_t minDistance, int64_t maxDistance)
 				const Key nextKey{nextPos, d};
 				if (auto it = distMap.find(nextKey); it == distMap.end() || nextCost < it->second)
 				{
-					distMap.emplace(nextKey, nextCost);
+					distMap.insert_or_assign(nextKey, nextCost);
 					pq.emplace(nextCost, nextKey);
 				}
 			}
