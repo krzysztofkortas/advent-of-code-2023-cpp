@@ -1,13 +1,11 @@
 #include "inputs/day21.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <ranges>
 #include <set>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -81,7 +79,7 @@ private:
 		std::vector<int64_t> answers(precalculatedSteps + 1, 0);
 		answers[0] = 1;
 
-		for (int64_t distance : vw::iota(1, precalculatedSteps + 1))
+		for (const int64_t distance : vw::iota(1, precalculatedSteps + 1))
 		{
 			plots = getNewPlots(plots, visited);
 			visited.insert(plots.cbegin(), plots.cend());
@@ -109,7 +107,7 @@ private:
 		const int64_t neededSteps = (steps + gridSize_ - 1) / gridSize_;
 		const int64_t diff = answers.at(2) - (2 * answers.at(1)) + answers.at(0);
 
-		for (int64_t answersSize : vw::iota(ssize(answers), neededSteps))
+		for (const int64_t answersSize : vw::iota(ssize(answers), neededSteps))
 			answers.push_back(diff + (2 * answers[answersSize - 1]) - answers[answersSize - 2]);
 
 		return answers.back();
