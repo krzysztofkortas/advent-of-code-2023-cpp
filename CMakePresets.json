@@ -34,12 +34,12 @@
             "inherits": "conf-common",
             "description": "General settings that apply to clang",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "/usr/bin/clang-19",
-                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-19",
+                "CMAKE_C_COMPILER": "/usr/bin/clang-20",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-20",
                 "CMAKE_CXX_STANDARD_LIBRARIES": "/usr/local/lib64/libstdc++.so",
                 "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/15.0.0;/usr/local/include/c++/15.0.0/x86_64-linux-gnu",
-                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-19",
-                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-19-toolchain.cmake"
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-20",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-20-toolchain.cmake"
             }
         },
         {

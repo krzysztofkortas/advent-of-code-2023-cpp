@@ -1,7 +1,7 @@
 {
     "C_Cpp.intelliSenseEngine": "disabled",
-    "C_Cpp.clang_format_path": "/usr/bin/clang-format-19",
-    "clangd.path": "/usr/bin/clangd-19",
+    "C_Cpp.clang_format_path": "/usr/bin/clang-format-20",
+    "clangd.path": "/usr/bin/clangd-20",
     "clangd.arguments": [
         "--background-index",
         "--compile-commands-dir=${workspaceFolder}/build/clang-debug"
