@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <ranges>
 #include <string_view>
 #include <vector>
@@ -176,7 +177,7 @@ int64_t getMappedSeed(const Maps& maps, int64_t seed)
 int64_t solvePart1(std::string_view input)
 {
 	const auto [seeds, maps] = Parsing::parse(input);
-	return rng::min(seeds | vw::transform([&](int64_t seed) { return getMappedSeed(maps, seed); }));
+	return rng::min(seeds | vw::transform(std::bind_front(&getMappedSeed, maps)));
 }
 
 struct SeedRange
