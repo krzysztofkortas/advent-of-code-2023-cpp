@@ -46,7 +46,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if(ENABLE_CLANG_TIDY)
-    find_program(CLANGTIDY clang-tidy-19)
+    find_program(CLANGTIDY clang-tidy-20)
 
     set(CLANG_TIDY_OPTIONS
         ${CLANGTIDY}
