@@ -46,7 +46,7 @@ Numbers getNumbers(const Grid& grid)
 {
 	Numbers numbers;
 	const std::regex regex{R"(\d+)"};
-	for (auto&& [row, line] : grid | vw::enumerate)
+	for (const auto& [row, line] : grid | vw::enumerate)
 	{
 		using Iter = std::regex_iterator<decltype(std::cbegin(line))>;
 		for (auto it = Iter{line.cbegin(), line.cend(), regex}; it != Iter{}; ++it)
@@ -59,9 +59,9 @@ Numbers getNumbers(const Grid& grid)
 Positions getSymbolPositions(const Grid& grid, std::predicate<char> auto isSymbol)
 {
 	Positions positions;
-	for (auto&& [row, line] : grid | vw::enumerate)
+	for (const auto& [row, line] : grid | vw::enumerate)
 	{
-		for (auto&& [col, c] : line | vw::enumerate)
+		for (const auto& [col, c] : line | vw::enumerate)
 		{
 			if (isSymbol(c))
 				positions.emplace_back(row, col);
