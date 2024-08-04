@@ -77,7 +77,7 @@ private:
 		Positions visited{start};
 		Positions plots{start};
 		std::vector<int64_t> answers(precalculatedSteps + 1, 0);
-		answers[0] = 1;
+		answers.at(0) = 1;
 
 		for (const int64_t distance : vw::iota(1, precalculatedSteps + 1))
 		{

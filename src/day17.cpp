@@ -53,7 +53,7 @@ public:
 			if (pos == destination)
 				return cost;
 
-			for (const auto [nextCost, nextKey] : getNextPositions(key, cost))
+			for (const auto& [nextCost, nextKey] : getNextPositions(key, cost))
 			{
 				if (auto it = distMap.find(nextKey); it == distMap.end() || nextCost < it->second)
 				{
