@@ -9,6 +9,7 @@ target_sources(
            day05.cpp
            day06.cpp
            day07.cpp
+           day08.cpp
            day09.cpp
            day10.cpp
            day11.cpp
