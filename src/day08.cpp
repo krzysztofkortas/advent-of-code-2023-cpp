@@ -12,8 +12,6 @@
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
-
 namespace
 {
 
