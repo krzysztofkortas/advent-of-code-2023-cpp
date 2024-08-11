@@ -61,6 +61,7 @@ endif()
 
 include(CTest)
 
+find_package(Boost REQUIRED COMPONENTS graph)
 find_package(GTest CONFIG REQUIRED)
 find_package(pegtl CONFIG REQUIRED)
 

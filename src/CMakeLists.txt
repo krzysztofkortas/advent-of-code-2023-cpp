@@ -22,9 +22,10 @@ target_sources(
            day18.cpp
            day19.cpp
            day21.cpp
-           day23.cpp)
+           day23.cpp
+           day25.cpp)
 
-target_link_libraries(aoc2023 PRIVATE GTest::gtest_main taocpp::pegtl)
+target_link_libraries(aoc2023 PRIVATE Boost::graph GTest::gtest_main taocpp::pegtl)
 
 include(GoogleTest)
 gtest_discover_tests(aoc2023)
