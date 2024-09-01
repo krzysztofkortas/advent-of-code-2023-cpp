@@ -21,6 +21,7 @@ target_sources(
            day17.cpp
            day18.cpp
            day19.cpp
+           day20.cpp
            day21.cpp
            day22.cpp
            day23.cpp

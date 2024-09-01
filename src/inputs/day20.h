@@ -1,0 +1,82 @@
+#include <string_view>
+
+namespace day20
+{
+
+using namespace std::literals;
+
+inline constexpr auto sample1 =
+	R"(broadcaster -> a, b, c
+%a -> b
+%b -> c
+%c -> inv
+&inv -> a)"sv;
+
+inline constexpr auto sample2 =
+	R"(broadcaster -> a
+%a -> inv, con
+&inv -> b
+%b -> con
+&con -> output)"sv;
+
+inline constexpr auto input =
+	R"(%fx -> kh, hl
+%nv -> fx, hl
+&vm -> zg
+%rr -> rl, ql
+&bc -> rn, pm, rp, xg, fv, tn
+%xg -> xm
+%kl -> hl
+&hq -> xt, sp, gl, jd, jl, ss, mc
+%xn -> mv, bc
+%dp -> hh, ql
+%mv -> bc, pp
+%rg -> hq, zq
+&lm -> zg
+%mc -> xt
+%ct -> rd
+%ss -> mz
+%rt -> kk, hl
+%mz -> hq, sp
+%zq -> hq, qj
+%rn -> pm
+%kk -> ld
+%hh -> ql, vb
+%kc -> kl, hl
+%pm -> tt
+%fh -> bc, jn
+&jd -> zg
+broadcaster -> rt, jr, rp, jl
+%cp -> ql, ln
+&fv -> zg
+&ql -> ln, jr, xs, mg, vm
+%xm -> bc, xn
+%xt -> ss
+%mg -> lt
+%ln -> rr
+%qj -> hq
+%ld -> nv
+%pp -> bc
+%gl -> mc
+%rd -> hl, zz
+%jl -> js, hq
+%jr -> xs, ql
+%jn -> bc, tn
+%sp -> gh
+%vb -> ql
+%gh -> rg, hq
+%vh -> ql, dp
+%js -> gl, hq
+%kh -> ck
+&hl -> kh, rt, ct, kk, lm, ld
+%rp -> fh, bc
+%tt -> xg, bc
+%xs -> mg
+%lt -> ql, cp
+%zz -> hl, kc
+%tn -> rn
+%ck -> hl, ct
+%rl -> ql, vh
+&zg -> rx)"sv;
+
+} // namespace day20
