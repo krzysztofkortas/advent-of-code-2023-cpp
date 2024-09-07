@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
-#include <tao/pegtl/internal/pegtl_string.hpp>
 
 namespace
 {
