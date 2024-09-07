@@ -73,7 +73,7 @@ using HashMap = std::array<Steps, modulo>;
 
 Step makeStep(const std::string& step)
 {
-	static const std::regex regex(R"((\w+)([-=])(\w*))");
+	static const std::regex regex{R"((\w+)([-=])(\w*))"};
 	if (std::smatch match; std::regex_match(step, match, regex))
 	{
 		return Step{

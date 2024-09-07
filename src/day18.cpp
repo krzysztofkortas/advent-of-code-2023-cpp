@@ -106,7 +106,7 @@ int64_t solvePart2(std::string_view input)
 {
 	const Instructions instructions = input | vw::split('\n')
 		| vw::transform(rng::to<std::string>()) | vw::transform([](const std::string& line) {
-		static const std::regex regex(R"(\w \d+ \(#(\w{5})(\d)\))");
+		static const std::regex regex{R"(\w \d+ \(#(\w{5})(\d)\))"};
 		if (std::smatch match; std::regex_match(line, match, regex))
 		{
 			const Direction dir = getDir(match.str(2).at(0));
