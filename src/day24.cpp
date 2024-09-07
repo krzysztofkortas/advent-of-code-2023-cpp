@@ -6,14 +6,14 @@
 #include <optional>
 #include <ranges>
 #include <regex>
-#include <string_view>
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "z3++.h"
+#include <z3++.h>
 
 namespace
 {
@@ -131,9 +131,12 @@ int64_t solvePart2(std::string_view input)
 	for (const auto& [i, hailstone] : hailstones | vw::take(3) | vw::enumerate)
 	{
 		const z3::expr t = c.int_const(std::format("t{}", i).c_str());
-		solver.add(x == c.int_val(hailstone.position.x) - t*(vx - c.int_val(hailstone.velocity.x)));
-		solver.add(y == c.int_val(hailstone.position.y) - t*(vy - c.int_val(hailstone.velocity.y)));
-		solver.add(z == c.int_val(hailstone.position.z) - t*(vz - c.int_val(hailstone.velocity.z)));
+		solver.add(
+			x == c.int_val(hailstone.position.x) - t * (vx - c.int_val(hailstone.velocity.x)));
+		solver.add(
+			y == c.int_val(hailstone.position.y) - t * (vy - c.int_val(hailstone.velocity.y)));
+		solver.add(
+			z == c.int_val(hailstone.position.z) - t * (vz - c.int_val(hailstone.velocity.z)));
 	}
 
 	if (solver.check() != z3::sat)
