@@ -5,6 +5,13 @@
             "name": "(ctest) Launch",
             "type": "cppdbg",
             "request": "launch",
+            "setupCommands": [
+                {
+                    "text": "-enable-pretty-printing",
+                    "description": "enable pretty printing",
+                    "ignoreFailures": true
+                }
+            ],
             // Resolved by CMake Tools:
             "cwd": "${cmake.testWorkingDirectory}",
             "program": "${cmake.testProgram}",
