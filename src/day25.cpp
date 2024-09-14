@@ -9,7 +9,14 @@
 #include <string_view>
 #include <vector>
 
+#if defined(__GNUC__) && !defined(__clang__)
+	#pragma GCC diagnostic push 
+	#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <boost/graph/adjacency_list.hpp>
+#if defined(__GNUC__) && !defined(__clang__)
+	#pragma GCC diagnostic pop
+#endif
 #include <boost/graph/graph_selectors.hpp>
 #include <boost/graph/labeled_graph.hpp>
 #include <boost/graph/named_function_params.hpp>
