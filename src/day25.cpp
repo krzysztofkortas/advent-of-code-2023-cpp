@@ -10,12 +10,12 @@
 #include <vector>
 
 #if defined(__GNUC__) && !defined(__clang__)
-	#pragma GCC diagnostic push 
-	#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include <boost/graph/adjacency_list.hpp>
 #if defined(__GNUC__) && !defined(__clang__)
-	#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 #include <boost/graph/graph_selectors.hpp>
 #include <boost/graph/labeled_graph.hpp>
@@ -70,8 +70,11 @@ int64_t solve(std::string_view input)
 
 TEST(day25, test)
 {
+	// Suppress clang-analyzer warnings from boost::stoer_wagner_min_cut
+	// NOLINTBEGIN(clang-analyzer-*)
 	EXPECT_EQ(solve(day25::sample), 54);
 	EXPECT_EQ(solve(day25::input), 544523);
+	// NOLINTEND(clang-analyzer-*)
 }
 
 } // anonymous namespace
