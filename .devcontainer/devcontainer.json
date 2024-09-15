@@ -1,5 +1,5 @@
 {
-	"image": "krzysztofkortas/devenv-trunk:latest",
+	"image": "krzysztofkortas/cppenv-trunk:latest",
 	"customizations": {
 		"vscode": {
 			"extensions": [
