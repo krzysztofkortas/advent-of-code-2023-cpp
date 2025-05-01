@@ -271,9 +271,7 @@ void pushButton(ModulesMap& modules, std::invocable<std::string, bool, std::stri
 
 		if (const auto it = modules.find(destination); it != modules.cend())
 		{
-			const auto sendVisitor = [&](auto& module) {
-				return module.send(pulse, from); // NOLINT(clang-analyzer-core.NullDereference)
-			};
+			const auto sendVisitor = [&](auto& module) { return module.send(pulse, from); };
 			for (const auto& [key, value] : std::visit(sendVisitor, it->second))
 				q.emplace(key, value, destination);
 		}
@@ -330,7 +328,6 @@ int64_t pushesToGetRx(ModulesMap& modules)
 		});
 	}
 
-	// NOLINTNEXTLINE(misc-include-cleaner)
 	return rng::fold_left_first(beforeRxInputsCounts | vw::values, [](int64_t x, int64_t y) {
 		return std::lcm(x, y);
 	}).value_or(0);

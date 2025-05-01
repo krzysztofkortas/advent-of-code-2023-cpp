@@ -1,6 +1,6 @@
 #include "inputs/day08.h"
 
-#include <algorithm> // NOLINT(misc-include-cleaner)
+#include <algorithm>
 #include <cstdint>
 #include <map>
 #include <numeric>
@@ -167,8 +167,8 @@ int64_t solvePart2(std::string_view input)
 {
 	const auto [instructions, nodes] = Parsing::parse(input);
 
-	// NOLINTNEXTLINE(misc-include-cleaner)
-	return rng::fold_left_first(nodes | vw::values | vw::filter([](const Node& node) {
+	return rng::fold_left_first(
+			   nodes | vw::values | vw::filter([](const Node& node) {
 		return node.name.ends_with('A');
 	}) | vw::transform([&](const Node& node) {
 		return getSteps(instructions, nodes, node.name, "Z");
