@@ -1,17 +1,10 @@
-#include "inputs/day02.h"
-
-#include <algorithm>
-#include <cassert>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
+import std;
+
+import inputs.day02;
+import utils;
 
 namespace
 {
@@ -186,7 +179,7 @@ int solvePart1(std::string_view input)
 	constexpr int maxRed = 12;
 	constexpr int maxGreen = 13;
 	constexpr int maxBlue = 14;
-	return Utils::sum(games | vw::filter([](const Game& game) {
+	return utils::sum(games | vw::filter([](const Game& game) {
 		const MaxCount maxCount = getMaxCount(game.sets);
 		return maxCount.red <= maxRed && maxCount.green <= maxGreen && maxCount.blue <= maxBlue;
 	}) | vw::transform(&Game::id));
@@ -195,7 +188,7 @@ int solvePart1(std::string_view input)
 int solvePart2(std::string_view input)
 {
 	const Games games = Parsing::parse(input);
-	return Utils::sum(games | vw::transform([](const Game& game) {
+	return utils::sum(games | vw::transform([](const Game& game) {
 		const MaxCount maxCount = getMaxCount(game.sets);
 		return maxCount.red * maxCount.green * maxCount.blue;
 	}));

@@ -1,21 +1,9 @@
-#include "inputs/day20.h"
-
-#include <algorithm>
-#include <concepts>
-#include <cstdint>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <utility>
-#include <variant>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+import std;
+
+import inputs.day20;
 
 namespace
 {

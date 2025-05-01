@@ -1,19 +1,9 @@
-#include "inputs/day18.h"
-
-#include <cassert>
-#include <cmath>
-#include <cstdint>
-#include <ranges>
-#include <regex>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day18;
+import utils;
 
 namespace
 {
@@ -54,14 +44,14 @@ using Instructions = std::vector<Instruction>;
 int64_t shoelaceFormula(const Positions& positions)
 {
 	return std::abs(
-		Utils::sum(positions | vw::pairwise_transform([](const Position& p1, const Position& p2) {
+		utils::sum(positions | vw::pairwise_transform([](const Position& p1, const Position& p2) {
 		return (p1.first * p2.second) - (p1.second * p2.first);
 	})) / 2);
 }
 
 int64_t perimeter(const Instructions& instructions)
 {
-	return Utils::sum(instructions | vw::transform(&Instruction::meters));
+	return utils::sum(instructions | vw::transform(&Instruction::meters));
 }
 
 int64_t integerPointsFromPickTheorem(int64_t area, int64_t perimeter)

@@ -1,18 +1,9 @@
-#include "inputs/day03.h"
-
-#include <algorithm>
-#include <cmath>
-#include <concepts>
-#include <cstdint>
-#include <ranges>
-#include <regex>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day03;
+import utils;
 
 namespace
 {
@@ -88,7 +79,7 @@ int solvePart1(std::string_view input)
 	constexpr auto isSymbol = [](char c) { return !"0123456789."sv.contains(c); };
 	const Positions symbolPositions = getSymbolPositions(grid, isSymbol);
 	const Numbers numbers = getNumbers(grid);
-	return Utils::sum(numbers | vw::filter([&symbolPositions](const Number& number) {
+	return utils::sum(numbers | vw::filter([&symbolPositions](const Number& number) {
 		return rng::any_of(symbolPositions, [&number](const Pos& symbolPos) {
 			return isAdjacent(number, symbolPos);
 		});
@@ -100,7 +91,7 @@ int solvePart2(std::string_view input)
 	const Grid grid = readGrid(input);
 	const Positions asterisks = getSymbolPositions(grid, [](char c) { return c == '*'; });
 
-	return Utils::sum(
+	return utils::sum(
 		asterisks | vw::transform([numbers = getNumbers(grid)](const Pos& asteriskPos) {
 		return numbers | vw::filter([&asteriskPos](const Number& number) {
 			return isAdjacent(number, asteriskPos);

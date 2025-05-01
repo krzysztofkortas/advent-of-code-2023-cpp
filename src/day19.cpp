@@ -1,18 +1,10 @@
-#include "inputs/day19.h"
-
-#include <cstdint>
-#include <optional>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
+import std;
+
+import inputs.day19;
+import utils;
 
 namespace
 {
@@ -320,7 +312,7 @@ int64_t solvePart1(std::string_view input)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-	return Utils::sum(
+	return utils::sum(
 		ratings | vw::filter([&](const Rating& rating) {
 		return isWorkflowAccepted(startWorkflow, workflows, rating);
 	}) | vw::transform(vw::values)
@@ -359,7 +351,7 @@ std::pair<RatingRange, RatingRange> crossCondition(
 
 int64_t countRatings(const RatingRange& ratings)
 {
-	return Utils::multiply(ratings | vw::values | vw::transform([](const Range& range) {
+	return utils::multiply(ratings | vw::values | vw::transform([](const Range& range) {
 		return range.end - range.start;
 	}));
 }
@@ -375,7 +367,7 @@ int64_t countAccepted(const Rules& rules, const Workflows& workflows, RatingRang
 			return countAccepted(workflows.at(consequent), workflows, ratingsToCount);
 	};
 
-	return Utils::sum(rules | vw::transform([&](const Rule& rule) {
+	return utils::sum(rules | vw::transform([&](const Rule& rule) {
 		if (!rule.condition)
 			return count(rule.consequent, ratings);
 

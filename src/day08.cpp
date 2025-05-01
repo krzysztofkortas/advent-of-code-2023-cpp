@@ -1,16 +1,9 @@
-#include "inputs/day08.h"
-
-#include <algorithm>
-#include <cstdint>
-#include <map>
-#include <numeric>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+import std;
+
+import inputs.day08;
 
 namespace
 {

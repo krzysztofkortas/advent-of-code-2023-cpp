@@ -1,18 +1,9 @@
-#include "inputs/day13.h"
-
-#include <algorithm>
-#include <concepts>
-#include <cstdint>
-#include <optional>
-#include <ranges>
-#include <span>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day13;
+import utils;
 
 namespace
 {
@@ -58,7 +49,7 @@ int64_t getVerticalReflection(const Pattern& pattern, std::optional<int64_t> ign
 
 int64_t solve(std::string_view input, std::invocable<Pattern> auto getReflection)
 {
-	return Utils::sum(input | vw::split("\n\n"sv) | vw::transform([&](auto&& pattern) {
+	return utils::sum(input | vw::split("\n\n"sv) | vw::transform([&](auto&& pattern) {
 		return getReflection(pattern | vw::split('\n') | rng::to<Pattern>());
 	}));
 }

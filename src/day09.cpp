@@ -1,17 +1,9 @@
-#include "inputs/day09.h"
-
-#include <algorithm>
-#include <concepts>
-#include <cstdint>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day09;
+import utils;
 
 namespace
 {
@@ -29,7 +21,7 @@ constexpr auto transformHistory()
 
 int64_t solve(std::string_view input, std::invocable<std::vector<int64_t>> auto getValue)
 {
-	return Utils::sum(input | vw::split('\n') | vw::transform([&](auto&& line) {
+	return utils::sum(input | vw::split('\n') | vw::transform([&](auto&& line) {
 		std::vector<int64_t> history = line | vw::split(' ') | vw::transform([](auto&& value) {
 			return static_cast<int64_t>(std::stoll(value | rng::to<std::string>()));
 		}) | rng::to<std::vector>();

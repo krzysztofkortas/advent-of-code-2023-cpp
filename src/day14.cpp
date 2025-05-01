@@ -1,16 +1,9 @@
-#include "inputs/day14.h"
-
-#include <algorithm>
-#include <cstdint>
-#include <map>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day14;
+import utils;
 
 namespace
 {
@@ -24,7 +17,7 @@ using Grid = std::vector<std::string>;
 
 int64_t calculateLoad(const Grid& grid)
 {
-	return Utils::sum(grid | vw::transform([](const std::string& line) {
+	return utils::sum(grid | vw::transform([](const std::string& line) {
 		return line | vw::enumerate
 			| vw::filter([](const auto& p) { return std::get<1>(p) == 'O'; })
 			| vw::transform([&line](const auto& p) { return ssize(line) - std::get<0>(p); });

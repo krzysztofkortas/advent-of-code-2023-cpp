@@ -1,8 +1,8 @@
-#include <algorithm>
-#include <functional>
-#include <ranges>
+export module utils;
 
-namespace Utils
+import std;
+
+export namespace utils
 {
 
 constexpr auto sum(std::ranges::range auto&& range)
@@ -15,4 +15,4 @@ constexpr auto multiply(std::ranges::range auto&& range)
 	return std::ranges::fold_left_first(range, std::multiplies{}).value();
 }
 
-} // namespace Utils
+} // namespace utils

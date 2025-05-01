@@ -1,21 +1,9 @@
-#include "inputs/day15.h"
-
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <concepts>
-#include <cstdint>
-#include <optional>
-#include <ranges>
-#include <regex>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day15;
+import utils;
 
 namespace
 {
@@ -38,7 +26,7 @@ constexpr auto getHash = [](RangeOf<char> auto&& range) {
 
 int64_t solvePart1(std::string_view input)
 {
-	return Utils::sum(input | vw::split(',') | vw::transform(getHash));
+	return utils::sum(input | vw::split(',') | vw::transform(getHash));
 }
 
 enum class Operation

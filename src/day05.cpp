@@ -1,15 +1,9 @@
-#include "inputs/day05.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <functional>
-#include <ranges>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
+
+import std;
+
+import inputs.day05;
 
 namespace
 {

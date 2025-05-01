@@ -1,18 +1,9 @@
-#include "inputs/day22.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <queue>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day22;
+import utils;
 
 namespace
 {
@@ -132,7 +123,7 @@ int64_t solvePart1(std::string_view input)
 
 int64_t solvePart2(std::string_view input)
 {
-	return Utils::sum(getFallingBricks(input));
+	return utils::sum(getFallingBricks(input));
 }
 
 TEST(day22, test)

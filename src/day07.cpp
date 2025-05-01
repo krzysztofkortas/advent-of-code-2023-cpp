@@ -1,19 +1,10 @@
-#include "inputs/day07.h"
-
-#include <algorithm>
-#include <cstdint>
-#include <functional>
-#include <map>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
+import std;
+
+import inputs.day07;
+import utils;
 
 namespace
 {
@@ -158,7 +149,7 @@ int64_t getOverallRating(Hands hands)
 		return getCardValues(lhs.cards) < getCardValues(rhs.cards);
 	});
 
-	return Utils::sum(hands | vw::enumerate | vw::transform([](const auto& p) {
+	return utils::sum(hands | vw::enumerate | vw::transform([](const auto& p) {
 		const auto& [index, hand] = p;
 		return (index + 1) * hand.bid;
 	}));

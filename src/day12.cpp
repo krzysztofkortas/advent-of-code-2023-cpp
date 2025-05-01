@@ -1,14 +1,9 @@
-#include "inputs/day12.h"
-
-#include <cstdint>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day12;
+import utils;
 
 namespace
 {
@@ -68,7 +63,7 @@ std::vector<Row> readInput(std::string_view input)
 
 int64_t solvePart1(std::string_view input)
 {
-	return Utils::sum(readInput(input) | vw::transform(getArrangements));
+	return utils::sum(readInput(input) | vw::transform(getArrangements));
 }
 
 Row unfold(const Row& row)
@@ -80,7 +75,7 @@ Row unfold(const Row& row)
 
 int64_t solvePart2(std::string_view input)
 {
-	return Utils::sum(readInput(input) | vw::transform(unfold) | vw::transform(getArrangements));
+	return utils::sum(readInput(input) | vw::transform(unfold) | vw::transform(getArrangements));
 }
 
 TEST(day12, test)

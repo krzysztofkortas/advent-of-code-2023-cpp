@@ -1,6 +1,8 @@
-#include <string_view>
+export module inputs.day07;
 
-namespace day07
+import std;
+
+export namespace day07
 {
 
 using namespace std::literals;

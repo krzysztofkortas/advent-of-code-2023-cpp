@@ -1,15 +1,8 @@
-#include "inputs/day21.h"
-
-#include <algorithm>
-#include <cstdint>
-#include <ranges>
-#include <set>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
+
+import std;
+
+import inputs.day21;
 
 namespace
 {
@@ -43,7 +36,7 @@ public:
 	[[nodiscard]] int64_t countPlots(int64_t steps) const
 	{
 		const int64_t modulo = steps % gridSize_;
-		const int64_t precalculatedSteps = std::min(steps, (modulo + (2 * gridSize_)));
+		const int64_t precalculatedSteps = std::min(steps, modulo + (2 * gridSize_));
 		const std::vector<int64_t> answers = getPrecalculatedAnswers(precalculatedSteps);
 
 		if (steps <= precalculatedSteps)

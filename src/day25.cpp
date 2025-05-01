@@ -1,14 +1,3 @@
-#include "inputs/day25.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <map>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -30,6 +19,10 @@
 #include <boost/graph/stoer_wagner_min_cut.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <gtest/gtest.h>
+
+import std;
+
+import inputs.day25;
 
 namespace
 {

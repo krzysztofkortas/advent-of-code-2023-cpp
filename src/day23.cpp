@@ -1,18 +1,8 @@
-#include "inputs/day23.h"
-
-#include <algorithm>
-#include <cstdint>
-#include <limits>
-#include <map>
-#include <ranges>
-#include <set>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
+
+import std;
+
+import inputs.day23;
 
 namespace
 {

@@ -1,19 +1,9 @@
-#include "inputs/day24.h"
-
-#include <cstdint>
-#include <format>
-#include <iterator>
-#include <optional>
-#include <ranges>
-#include <regex>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <z3++.h>
+
+import std;
+
+import inputs.day24;
 
 namespace
 {

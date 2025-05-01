@@ -1,18 +1,10 @@
-#include "inputs/day04.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <ranges>
-#include <set>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
+import std;
+
+import inputs.day04;
+import utils;
 
 namespace
 {
@@ -145,7 +137,7 @@ auto getIntersectionSize(
 int64_t solvePart1(std::string_view input)
 {
 	const Cards cards = Parsing::parse(input);
-	return Utils::sum(cards | vw::transform([](const Card& card) {
+	return utils::sum(cards | vw::transform([](const Card& card) {
 		return (1 << getIntersectionSize(card.winningNumbers, card.numbers)) >> 1;
 	}));
 }
@@ -161,7 +153,7 @@ int64_t solvePart2(std::string_view input)
 			cardsCount.at(i) += cardsCount.at(card.id - 1);
 	}
 
-	return Utils::sum(cardsCount);
+	return utils::sum(cardsCount);
 }
 
 TEST(day04, test)

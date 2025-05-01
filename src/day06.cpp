@@ -1,16 +1,10 @@
-#include "inputs/day06.h"
-
-#include <cmath>
-#include <cstdint>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
 #include <tao/pegtl.hpp>
 
-#include "Utils.h"
+import std;
+
+import inputs.day06;
+import utils;
 
 namespace
 {
@@ -136,7 +130,7 @@ int64_t getWinnings(const Race& race)
 int64_t solvePart1(std::string_view input)
 {
 	const Races races = Parsing::parsePart1(input);
-	return Utils::multiply(races | vw::transform(&getWinnings));
+	return utils::multiply(races | vw::transform(&getWinnings));
 }
 
 int64_t solvePart2(std::string_view input)

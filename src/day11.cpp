@@ -1,14 +1,8 @@
-#include "inputs/day11.h"
-
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include <gtest/gtest.h>
+
+import std;
+
+import inputs.day11;
 
 namespace
 {

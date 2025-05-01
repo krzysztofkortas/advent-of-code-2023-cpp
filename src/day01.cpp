@@ -1,13 +1,9 @@
-#include "inputs/day01.h"
-
-#include <cassert>
-#include <ranges>
-#include <string>
-#include <string_view>
-
 #include <gtest/gtest.h>
 
-#include "Utils.h"
+import std;
+
+import inputs.day01;
+import utils;
 
 namespace
 {
@@ -17,7 +13,7 @@ namespace vw = std::views;
 
 constexpr int calculateTotalCalibration(std::string_view input)
 {
-	return Utils::sum(input | vw::split('\n') | vw::transform([](auto&& line) {
+	return utils::sum(input | vw::split('\n') | vw::transform([](auto&& line) {
 		auto digits = line | vw::filter([](char c) { return c >= '0' && c <= '9'; });
 		assert(!digits.empty());
 		return std::stoi(std::string{digits.front(), digits.back()});
