@@ -315,11 +315,19 @@ int64_t solvePart1(std::string_view input)
 {
 	const auto [workflows, ratings] = Parsing::parse(input);
 	const Rules& startWorkflow = workflows.at("in");
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 	return Utils::sum(
 		ratings | vw::filter([&](const Rating& rating) {
 		return isWorkflowAccepted(startWorkflow, workflows, rating);
 	}) | vw::transform(vw::values)
 		| vw::join);
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 std::pair<RatingRange, RatingRange> crossCondition(

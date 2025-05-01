@@ -1,5 +1,5 @@
 {
-    "clangd.path": "/usr/bin/clangd-20",
+    "clangd.path": "/usr/bin/clangd-21",
     "clangd.arguments": [
         "--background-index"
     ],

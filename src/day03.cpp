@@ -1,7 +1,6 @@
 #include "inputs/day03.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <concepts>
 #include <cstdint>

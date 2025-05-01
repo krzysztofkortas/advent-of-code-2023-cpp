@@ -13,7 +13,6 @@
 #include <utility>
 #include <vector>
 
-#include <bits/ranges_algo.h>
 #include <gtest/gtest.h>
 
 #include "Utils.h"
