@@ -1,6 +1,4 @@
 set(CMAKE_C_COMPILER "/usr/bin/clang-21")
 set(CMAKE_CXX_COMPILER "/usr/bin/clang++-21")
-set(CMAKE_CXX_FLAGS -nostdinc++)
-set(CMAKE_CXX_STANDARD_LIBRARIES "/usr/local/lib64/libstdc++.so")
-set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
-    "/usr/local/include/c++/16.0.0;/usr/local/include/c++/16.0.0/x86_64-linux-gnu")
+set(CMAKE_CXX_FLAGS
+    "--gcc-install-dir=/usr/local/lib/gcc/x86_64-linux-gnu/16.0.0 --stdlib=libstdc++")

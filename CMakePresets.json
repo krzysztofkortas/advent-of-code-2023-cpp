@@ -35,9 +35,6 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/clang-21",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
-                "CMAKE_CXX_FLAGS": "-nostdinc++",
-                "CMAKE_CXX_STANDARD_LIBRARIES": "/usr/local/lib64/libstdc++.so",
-                "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/local/include/c++/16.0.0;/usr/local/include/c++/16.0.0/x86_64-linux-gnu",
                 "VCPKG_TARGET_TRIPLET": "x64-linux-clang-21",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-21-toolchain.cmake"
             }
