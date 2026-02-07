@@ -33,10 +33,10 @@
             "inherits": "conf-common",
             "description": "General settings that apply to clang",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "/usr/bin/clang-21",
-                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-21",
-                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-21",
-                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-21-toolchain.cmake"
+                "CMAKE_C_COMPILER": "/usr/bin/clang-23",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++-23",
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/toolchains/clang-toolchain.cmake"
             }
         },
         {
